@@ -4,6 +4,7 @@ import '../../l10n/app_language.dart';
 import '../../l10n/strings.dart';
 import '../../providers/worker_directory.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import 'find_worker_screen.dart';
 
 /// Subcategories of one category group, with their worker counts.
@@ -99,7 +100,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   const SizedBox(height: 20),
                   Text(
                     S.of(context, 'choose_service'),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                    style: const TextStyle(
+                        fontFamily: AppTheme.headingFont,
+                        fontWeight: FontWeight.w800,
+                        fontSize: AppTheme.headingSize),
                   ),
                   const SizedBox(height: 12),
                 ],

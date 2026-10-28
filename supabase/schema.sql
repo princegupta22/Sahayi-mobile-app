@@ -100,9 +100,14 @@ create table if not exists public.workers (
   photo_url         text,
   work_photo_urls   text[] not null default '{}' check (cardinality(work_photo_urls) <= 3),
   rating            numeric(2,1) not null default 0 check (rating between 0 and 5),
+  is_available      boolean not null default true,   -- false = shown as "Booked"
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
+
+-- Added later; brings databases created before it up to date.
+alter table public.workers
+  add column if not exists is_available boolean not null default true;
 
 create index if not exists workers_category_idx   on public.workers (category_en);
 create index if not exists workers_city_idx       on public.workers (lower(city));
@@ -139,10 +144,12 @@ create policy "workers: delete own listing"
 -- Users must not be able to set their own rating: only grant the editable columns.
 revoke insert, update on public.workers from authenticated;
 grant  insert (user_id, name, category_en, category_ml, city, country,
-               experience_years, about, phone, photo_url, work_photo_urls)
+               experience_years, about, phone, photo_url, work_photo_urls,
+               is_available)
   on public.workers to authenticated;
 grant  update (name, category_en, category_ml, city, country,
-               experience_years, about, phone, photo_url, work_photo_urls)
+               experience_years, about, phone, photo_url, work_photo_urls,
+               is_available)
   on public.workers to authenticated;
 
 

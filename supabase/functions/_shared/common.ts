@@ -1,6 +1,15 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-export const AMOUNT_PAISE = 1900; // ₹19, fixed on the server – never trust the client
+/** One-time payments: price (fixed on the server – never trust the client)
+ *  and the profiles flag each one unlocks. */
+export const PURPOSES = {
+  contact: { amount: 9900, flag: "is_paid", paidAt: "paid_at" },             // ₹99
+  listing: { amount: 9900, flag: "is_worker_paid", paidAt: "worker_paid_at" }, // ₹99
+} as const;
+export type Purpose = keyof typeof PURPOSES;
+
+export const toPurpose = (v: unknown): Purpose =>
+  v === "listing" ? "listing" : "contact";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,7 +67,8 @@ export function safeEqual(a: string, b: string) {
   return diff === 0;
 }
 
-/** Marks a payment row paid and flips profiles.is_paid. Idempotent. */
+/** Marks a payment row paid and flips the profile flag for its purpose.
+ *  Idempotent. */
 export async function markPaid(
   admin: ReturnType<typeof adminClient>,
   orderId: string,
@@ -72,13 +82,14 @@ export async function markPaid(
       paid_at: new Date().toISOString(),
     })
     .eq("razorpay_order_id", orderId)
-    .select("user_id")
+    .select("user_id, purpose")
     .single();
   if (error || !row) throw new Error("payment row not found");
 
+  const { flag, paidAt } = PURPOSES[toPurpose(row.purpose)];
   const { error: pErr } = await admin
     .from("profiles")
-    .update({ is_paid: true, paid_at: new Date().toISOString() })
+    .update({ [flag]: true, [paidAt]: new Date().toISOString() })
     .eq("id", row.user_id);
   if (pErr) throw pErr;
 }

@@ -4,13 +4,40 @@ import '../../providers/auth_provider.dart';
 import '../../services/app_errors.dart';
 import '../../services/payment_service.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../l10n/strings.dart';
 import '../../widgets/auth_header.dart';
 import '../../widgets/primary_button.dart';
-import '../dashboard/dashboard_screen.dart';
 
+/// Checkout for a one-time [PaymentPurpose]. Pops `true` once the server
+/// confirms the payment.
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+  final PaymentPurpose purpose;
+  const PaymentScreen({super.key, required this.purpose});
+
+  /// True once [purpose] is paid, opening this screen first if it isn't.
+  static Future<bool> ensurePaid(
+    BuildContext context,
+    PaymentPurpose purpose,
+  ) async {
+    final auth = context.read<AuthProvider>();
+    if (auth.hasPaid(purpose)) return true;
+    try {
+      if (await auth.refreshPaid(purpose)) return true;
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.read(context, errorKeyFor(e)))),
+        );
+      }
+      return false;
+    }
+    if (!context.mounted) return false;
+    final paid = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => PaymentScreen(purpose: purpose)),
+    );
+    return paid == true;
+  }
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -23,77 +50,91 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final auth = context.read<AuthProvider>();
     setState(() => _loading = true);
     try {
-      final outcome =
-          await PaymentService.pay(name: auth.name, email: auth.email);
+      final outcome = await PaymentService.pay(
+        purpose: widget.purpose,
+        name: auth.name,
+        email: auth.email,
+      );
       if (!mounted || outcome == PaymentOutcome.cancelled) return;
       // Trust the server, not the checkout callback.
-      if (!await auth.refreshPaid()) throw StateError('payment_failed');
+      if (!await auth.refreshPaid(widget.purpose))
+        throw StateError('payment_failed');
       if (!mounted) return;
       await _showSuccess();
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-        (route) => false,
-      );
+      Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.read(context, errorKeyFor(e)))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.read(context, errorKeyFor(e)))));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _showSuccess() => showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          Future.delayed(const Duration(milliseconds: 1100), () {
-            if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
-              Navigator.of(dialogContext).pop();
-            }
-          });
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 68,
-                    height: 68,
-                    decoration: const BoxDecoration(
-                      color: AppColors.leaf,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check, color: Colors.white, size: 36),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    S.read(context, 'payment_success'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                  ),
-                ],
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      Future.delayed(const Duration(milliseconds: 1100), () {
+        if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
+          Navigator.of(dialogContext).pop();
+        }
+      });
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 68,
+                height: 68,
+                decoration: const BoxDecoration(
+                  color: AppColors.leaf,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 36),
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 18),
+              Text(
+                S.read(context, 'payment_success'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: AppTheme.headingSize,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
+    final listing = widget.purpose == PaymentPurpose.listing;
+    final perks = listing
+        ? ['perk_listed', 'perk_get_contacted', 'perk_edit_anytime']
+        : ['perk_message', 'perk_call', 'perk_all_workers'];
+
+    return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AuthHeader(
-            title: S.of(context, 'one_last_step'),
-            subtitle: S.of(context, 'fee_subtitle'),
+            showBack: true,
+            title: S.of(
+              context,
+              listing ? 'listing_fee_title' : 'unlock_contact',
+            ),
+            subtitle: S.of(
+              context,
+              listing ? 'listing_fee_subtitle' : 'unlock_subtitle',
+            ),
           ),
           Expanded(
             child: Padding(
@@ -116,7 +157,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      S.of(context, 'registration_fee'),
+                      S.of(context, listing ? 'listing_fee' : 'unlock_fee'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -124,27 +165,37 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '₹19',
-                      style: TextStyle(
+                    Text(
+                      widget.purpose.price,
+                      style: const TextStyle(
                         fontSize: 56,
                         fontWeight: FontWeight.w800,
                         color: AppColors.forest,
                       ),
                     ),
                     Text(
+                      S.of(context, 'incl_taxes'),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.forest,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
                       S.of(context, 'one_time'),
                       style: const TextStyle(
-                          fontSize: 12.5, color: AppColors.textSecondary),
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 22),
                     const Divider(),
                     const SizedBox(height: 18),
-                    _Perk(text: S.of(context, 'perk_badge')),
-                    const SizedBox(height: 12),
-                    _Perk(text: S.of(context, 'perk_access')),
-                    const SizedBox(height: 12),
-                    _Perk(text: S.of(context, 'perk_browse')),
+                    for (final (i, key) in perks.indexed) ...[
+                      if (i > 0) const SizedBox(height: 12),
+                      _Perk(text: S.of(context, key)),
+                    ],
                   ],
                 ),
               ),
@@ -163,7 +214,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
         ],
       ),
-      ),
     );
   }
 }
@@ -179,8 +229,10 @@ class _Perk extends StatelessWidget {
         const Icon(Icons.check_circle_rounded, color: AppColors.leaf, size: 20),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500),
+          ),
         ),
       ],
     );

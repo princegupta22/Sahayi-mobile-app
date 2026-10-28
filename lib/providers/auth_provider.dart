@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
+import '../services/payment_service.dart';
 
 /// Email + password login using Supabase's built-in email/password auth.
 class AuthProvider extends ChangeNotifier {
@@ -42,31 +43,32 @@ class AuthProvider extends ChangeNotifier {
     if (res.session == null) throw StateError('email_confirmation_on');
   }
 
-  bool _isPaid = false;
-  bool get isPaid => _isPaid;
+  final _paid = <PaymentPurpose, bool>{};
+  bool hasPaid(PaymentPurpose purpose) => _paid[purpose] ?? false;
 
-  /// Reads the paid flag from the server (profiles.is_paid). Fails closed:
-  /// any error means "not paid".
-  Future<bool> refreshPaid() async {
+  /// Reads the paid flags from the server (profiles.is_paid /
+  /// is_worker_paid) and returns the one for [purpose]. Errors propagate;
+  /// until a read succeeds the flags stay "not paid".
+  Future<bool> refreshPaid(PaymentPurpose purpose) async {
     final id = userId;
-    if (id == null) return _isPaid = false;
+    if (id == null) return false;
     try {
       final row = await supabase
           .from('profiles')
-          .select('is_paid')
+          .select(PaymentPurpose.values.map((p) => p.column).join(','))
           .eq('id', id)
           .maybeSingle();
-      _isPaid = row?['is_paid'] == true;
-    } catch (_) {
-      rethrow;
+      for (final p in PaymentPurpose.values) {
+        _paid[p] = row?[p.column] == true;
+      }
     } finally {
       notifyListeners();
     }
-    return _isPaid;
+    return hasPaid(purpose);
   }
 
   Future<void> signOut() async {
-    _isPaid = false;
+    _paid.clear();
     await supabase.auth.signOut();
   }
 

@@ -33,6 +33,7 @@ class SahayiApp extends StatelessWidget {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        builder: AppTheme.clampTextScale,
         home: const SetupRequiredScreen(),
       );
     }
@@ -48,6 +49,7 @@ class SahayiApp extends StatelessWidget {
         title: 'Sahayi',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        builder: AppTheme.clampTextScale,
         home: const SplashScreen(),
       ),
     );

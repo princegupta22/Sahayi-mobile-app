@@ -14,6 +14,11 @@ class ListingPhoto {
 }
 
 class WorkerDirectory extends ChangeNotifier {
+  /// Every column except phone, which only worker_phone() hands out.
+  static const _columns = 'id, user_id, name, category_en, category_ml, city, '
+      'country, experience_years, about, rating, photo_url, work_photo_urls, '
+      'is_available';
+
   List<Worker> _workers = [];
   Worker? _myListing;
   bool _loading = false;
@@ -33,6 +38,22 @@ class WorkerDirectory extends ChangeNotifier {
     return m;
   }
 
+  /// Worker count per city (case-insensitive), busiest city first.
+  Map<String, int> get countsByCity {
+    final counts = <String, int>{};
+    final names = <String, String>{};
+    for (final w in _workers) {
+      final city = w.city.trim();
+      if (city.isEmpty) continue;
+      final key = city.toLowerCase();
+      names.putIfAbsent(key, () => city);
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    final keys = counts.keys.toList()
+      ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
+    return {for (final k in keys) names[k]!: counts[k]!};
+  }
+
   Future<void> load() async {
     _loading = true;
     _error = null;
@@ -40,11 +61,19 @@ class WorkerDirectory extends ChangeNotifier {
     try {
       final rows = await supabase
           .from('workers')
-          .select()
+          .select(_columns)
           .order('created_at', ascending: false);
       _workers = rows.map<Worker>(Worker.fromMap).toList();
       final uid = supabase.auth.currentUser?.id;
-      _myListing = _workers.where((w) => w.userId == uid).firstOrNull;
+      final mine = rows.where((r) => r['user_id'] == uid).firstOrNull;
+      // The edit form needs my own number back.
+      _myListing = mine == null
+          ? null
+          : Worker.fromMap({
+              ...mine,
+              'phone': await supabase
+                  .rpc('worker_phone', params: {'wid': mine['id']}),
+            });
     } catch (e) {
       _error = e;
     } finally {
@@ -111,6 +140,22 @@ class WorkerDirectory extends ChangeNotifier {
         .eq('id', uid);
 
     await load();
+  }
+
+  /// Shows the signed-in worker as Available or Booked to everyone else.
+  Future<void> setAvailable(bool available) async {
+    final mine = _myListing;
+    if (mine == null) return;
+    final rows = await supabase
+        .from('workers')
+        .update({'is_available': available})
+        .eq('id', mine.id)
+        .select('is_available');
+    // RLS skips rows it won't let you change without raising an error.
+    if (rows.isEmpty) throw StateError('availability_not_saved');
+    _myListing = mine.copyWith(isAvailable: available);
+    _workers = [for (final w in _workers) w.id == mine.id ? _myListing! : w];
+    notifyListeners();
   }
 
   Future<String> _upload(String bucket, String uid, XFile file) async {

@@ -4,17 +4,36 @@ import '../config/supabase_config.dart';
 
 enum PaymentOutcome { success, cancelled }
 
-/// Razorpay checkout for the ₹19 registration fee. The amount, order and
-/// signature check all live in Supabase edge functions; the app never sees
-/// the Razorpay secret.
+/// The one-time payments, each with its own flag on profiles. Prices are
+/// display only; the charged amount is fixed in the edge functions.
+enum PaymentPurpose {
+  /// Messaging and calling workers.
+  contact('is_paid', '₹99', 'One-time contact unlock (Inclusive of all Taxes)'),
+
+  /// Publishing your own worker profile.
+  listing('is_worker_paid', '₹99', 'One-time worker profile fee (Inclusive of all Taxes)');
+
+  final String column;
+  final String price;
+  final String description;
+  const PaymentPurpose(this.column, this.price, this.description);
+}
+
+/// Razorpay checkout for a [PaymentPurpose]. The amount, order and signature
+/// check all live in Supabase edge functions; the app never sees the
+/// Razorpay secret.
 class PaymentService {
   /// Opens checkout and resolves once the server has verified the payment.
   /// Throws StateError('payment_failed') if verification fails.
   static Future<PaymentOutcome> pay({
+    required PaymentPurpose purpose,
     required String name,
     required String email,
   }) async {
-    final res = await supabase.functions.invoke('create-razorpay-order');
+    final res = await supabase.functions.invoke(
+      'create-razorpay-order',
+      body: {'purpose': purpose.name},
+    );
     final data = res.data as Map<String, dynamic>;
     if (data['already_paid'] == true) return PaymentOutcome.success;
     final orderId = data['order_id'] as String?;
@@ -61,7 +80,7 @@ class PaymentService {
       'amount': data['amount'],
       'currency': 'INR',
       'name': 'Sahayi',
-      'description': 'One-time registration fee',
+      'description': purpose.description,
       'prefill': {'email': email, 'name': name},
       'theme': {'color': '#2E7D32'},
     });

@@ -5,6 +5,8 @@ import '../../l10n/strings.dart';
 import '../../models/worker.dart';
 import '../../services/contact_actions.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/availability_tag.dart';
 import '../../widgets/photo_viewer.dart';
 import '../../widgets/worker_avatar.dart';
 import 'find_worker_screen.dart' show WorkPhotoStrip;
@@ -84,7 +86,8 @@ class WorkerDetailScreen extends StatelessWidget {
                     worker.name,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 22,
+                      fontFamily: AppTheme.headingFont,
+                      fontSize: AppTheme.headingSize,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.3,
                     ),
@@ -106,6 +109,8 @@ class WorkerDetailScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  AvailabilityTag(available: worker.isAvailable),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -251,7 +256,10 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+        style: const TextStyle(
+            fontFamily: AppTheme.headingFont,
+            fontWeight: FontWeight.w800,
+            fontSize: AppTheme.headingSize),
       );
 }
 

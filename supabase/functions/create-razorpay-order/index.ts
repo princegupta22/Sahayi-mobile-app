@@ -1,5 +1,5 @@
-// Creates a ₹19 Razorpay order for the signed-in user.
-import { adminClient, AMOUNT_PAISE, corsHeaders, getUser, json } from "../_shared/common.ts";
+// Creates a Razorpay order for one of the one-time payments (see PURPOSES).
+import { adminClient, corsHeaders, getUser, json, PURPOSES, toPurpose } from "../_shared/common.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -7,10 +7,16 @@ Deno.serve(async (req) => {
   const user = await getUser(req);
   if (!user) return json({ error: "unauthorized" }, 401);
 
+  const { purpose: rawPurpose } = await req.json().catch(() => ({}));
+  const purpose = toPurpose(rawPurpose);
+  const { amount, flag } = PURPOSES[purpose];
+
   const admin = adminClient();
   const { data: profile } = await admin
-    .from("profiles").select("is_paid").eq("id", user.id).single();
-  if (profile?.is_paid) return json({ already_paid: true });
+    .from("profiles").select(flag).eq("id", user.id).single();
+  if ((profile as Record<string, unknown> | null)?.[flag]) {
+    return json({ already_paid: true });
+  }
 
   const keyId = Deno.env.get("RAZORPAY_KEY_ID")!;
   const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET")!;
@@ -22,10 +28,10 @@ Deno.serve(async (req) => {
       Authorization: "Basic " + btoa(`${keyId}:${keySecret}`),
     },
     body: JSON.stringify({
-      amount: AMOUNT_PAISE,
+      amount,
       currency: "INR",
       receipt: `sahayi_${user.id.slice(0, 8)}_${Date.now()}`,
-      notes: { user_id: user.id },
+      notes: { user_id: user.id, purpose },
     }),
   });
   const order = await res.json();
@@ -37,8 +43,9 @@ Deno.serve(async (req) => {
   const { error } = await admin.from("payments").insert({
     user_id: user.id,
     razorpay_order_id: order.id,
-    amount: AMOUNT_PAISE,
+    amount,
     currency: "INR",
+    purpose,
   });
   if (error) {
     console.error(error);
@@ -47,7 +54,7 @@ Deno.serve(async (req) => {
 
   return json({
     order_id: order.id,
-    amount: AMOUNT_PAISE,
+    amount,
     currency: "INR",
     key_id: keyId, // public key id is safe to send to the app
   });

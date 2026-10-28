@@ -6,6 +6,7 @@ import '../../models/message.dart';
 import '../../providers/conversations_provider.dart';
 import '../../services/app_errors.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/time_format.dart';
 import '../../widgets/worker_avatar.dart';
 import 'chat_screen.dart';
@@ -55,7 +56,8 @@ class MessagesTab extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
           child: Text(
             S.of(context, 'messages'),
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            style: const TextStyle(
+                fontFamily: AppTheme.headingFont, fontSize: AppTheme.headingSize, fontWeight: FontWeight.w800),
           ),
         ),
         Expanded(child: body),
@@ -88,7 +90,7 @@ class _Message extends StatelessWidget {
               const SizedBox(height: 6),
               Text(subtitle!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: AppTheme.subheadingSize)),
             ],
             if (action != null) action!,
           ],

@@ -2,14 +2,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../l10n/strings.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../config/supabase_config.dart';
 import '../auth/login_screen.dart';
-import '../payment/payment_gate.dart';
+import '../dashboard/dashboard_screen.dart';
 
 /// One controller drives the whole sequence (no spinner, no timers), so the
 /// splash is a single smooth, deterministic timeline:
 ///   0.00–0.35  logo pops in      0.20–0.65  rings ripple out
-///   0.35–0.70  name letters rise 0.60–0.85  Malayalam + tagline fade in
+///   0.35–0.70  name letters rise 0.60–0.85  tagline fades in
 ///   0.00–1.00  thin progress bar fills, then fade to Login
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +21,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  static const _name = 'Sahayi';
+  static const _name = 'സഹായി';
 
   late final AnimationController _c;
   bool _precached = false;
@@ -28,12 +29,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4000),
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) _goNext();
-      });
+    _c =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 4000),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) _goNext();
+        });
   }
 
   @override
@@ -43,10 +45,11 @@ class _SplashScreenState extends State<SplashScreen>
     _precached = true;
     // Decode the logo before the first frame of the animation so the
     // intro never stutters.
-    precacheImage(const AssetImage('assets/logo.png'), context)
-        .whenComplete(() {
-      if (mounted) _c.forward();
-    });
+    precacheImage(const AssetImage('assets/logo.png'), context).whenComplete(
+      () {
+        if (mounted) _c.forward();
+      },
+    );
   }
 
   void _goNext() {
@@ -56,8 +59,8 @@ class _SplashScreenState extends State<SplashScreen>
         transitionDuration: const Duration(milliseconds: 450),
         pageBuilder: (_, anim, secondary) =>
             supabase.auth.currentSession != null
-                ? const PaymentGate()
-                : const LoginScreen(),
+            ? const DashboardScreen()
+            : const LoginScreen(),
         transitionsBuilder: (_, anim, secondary, child) =>
             FadeTransition(opacity: anim, child: child),
       ),
@@ -70,17 +73,27 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  Animation<double> _interval(double a, double b, [Curve curve = Curves.easeOut]) =>
-      CurvedAnimation(parent: _c, curve: Interval(a, b, curve: curve));
+  Animation<double> _interval(
+    double a,
+    double b, [
+    Curve curve = Curves.easeOut,
+  ]) => CurvedAnimation(
+    parent: _c,
+    curve: Interval(a, b, curve: curve),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final logoScale = Tween<double>(begin: 0.3, end: 1)
-        .animate(_interval(0.0, 0.35, Curves.easeOutBack));
+    final logoScale = Tween<double>(
+      begin: 0.3,
+      end: 1,
+    ).animate(_interval(0.0, 0.35, Curves.easeOutBack));
     final logoFade = _interval(0.0, 0.2);
     final tagFade = _interval(0.60, 0.85);
-    final tagSlide = Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero)
-        .animate(_interval(0.60, 0.85, Curves.easeOutCubic));
+    final tagSlide = Tween<Offset>(
+      begin: const Offset(0, 0.4),
+      end: Offset.zero,
+    ).animate(_interval(0.60, 0.85, Curves.easeOutCubic));
 
     return Scaffold(
       body: Stack(
@@ -91,7 +104,11 @@ class _SplashScreenState extends State<SplashScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFFE3F3DF), Color(0xFFF6FAF5), Color(0xFFFFF4E5)],
+                colors: [
+                  Color(0xFFE3F3DF),
+                  Color(0xFFF6FAF5),
+                  Color(0xFFFFF4E5),
+                ],
                 stops: [0, 0.55, 1],
               ),
             ),
@@ -107,70 +124,65 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               children: [
                 const Spacer(flex: 5),
+                // The ripples need 300px, but only the logo should take up
+                // layout space so the name sits close underneath it.
                 SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _c,
-                          builder: (_, _) => CustomPaint(
-                            size: const Size(300, 300),
-                            painter: _RipplePainter(_c.value),
-                          ),
-                        ),
-                      ),
-                      FadeTransition(
-                        opacity: logoFade,
-                        child: ScaleTransition(
-                          scale: logoScale,
-                          child: Container(
-                            width: 184,
-                            height: 184,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.leaf.withValues(alpha: 0.25),
-                                  blurRadius: 32,
-                                  offset: const Offset(0, 12),
-                                ),
-                              ],
-                            ),
-                            // The logo PNG has an opaque white background, so
-                            // clip it to the circle or its square corners show.
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/logo.png',
-                                fit: BoxFit.cover,
+                  height: 220,
+                  child: OverflowBox(
+                    maxHeight: 300,
+                    child: SizedBox(
+                      width: 300,
+                      height: 300,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          RepaintBoundary(
+                            child: AnimatedBuilder(
+                              animation: _c,
+                              builder: (_, _) => CustomPaint(
+                                size: const Size(300, 300),
+                                painter: _RipplePainter(_c.value),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _AnimatedName(controller: _c, text: _name),
-                const SizedBox(height: 4),
-                FadeTransition(
-                  opacity: tagFade,
-                  child: SlideTransition(
-                    position: tagSlide,
-                    child: const Text(
-                      'സഹായി',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.roofDeep,
+                          FadeTransition(
+                            opacity: logoFade,
+                            child: ScaleTransition(
+                              scale: logoScale,
+                              child: Container(
+                                width: 184,
+                                height: 184,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.leaf.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                      blurRadius: 32,
+                                      offset: const Offset(0, 12),
+                                    ),
+                                  ],
+                                ),
+                                // The logo PNG has an opaque white background, so
+                                // clip it to the circle or its square corners show.
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/logo.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 4),
+                _AnimatedName(controller: _c, text: _name),
                 const SizedBox(height: 14),
                 FadeTransition(
                   opacity: tagFade,
@@ -182,10 +194,10 @@ class _SplashScreenState extends State<SplashScreen>
                         S.of(context, 'tagline'),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           height: 1.4,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -202,8 +214,9 @@ class _SplashScreenState extends State<SplashScreen>
                         value: Curves.easeInOut.transform(_c.value),
                         minHeight: 4,
                         backgroundColor: AppColors.divider,
-                        valueColor:
-                            const AlwaysStoppedAnimation(AppColors.leaf),
+                        valueColor: const AlwaysStoppedAnimation(
+                          AppColors.leaf,
+                        ),
                       ),
                     ),
                   ),
@@ -218,7 +231,8 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-/// "Sahayi" with each letter rising and fading in one after another.
+/// The name with each letter rising and fading in one after another.
+/// Split by grapheme so Malayalam vowel signs stay joined to their consonant.
 class _AnimatedName extends StatelessWidget {
   final AnimationController controller;
   final String text;
@@ -226,13 +240,18 @@ class _AnimatedName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final letters = text.characters.toList();
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(text.length, (i) {
+      children: List.generate(letters.length, (i) {
         final start = 0.35 + i * 0.045;
         final anim = CurvedAnimation(
           parent: controller,
-          curve: Interval(start, math.min(start + 0.2, 1), curve: Curves.easeOutCubic),
+          curve: Interval(
+            start,
+            math.min(start + 0.2, 1),
+            curve: Curves.easeOutCubic,
+          ),
         );
         return AnimatedBuilder(
           animation: anim,
@@ -244,10 +263,11 @@ class _AnimatedName extends StatelessWidget {
             ),
           ),
           child: Text(
-            text[i],
+            letters[i],
             style: const TextStyle(
-              fontSize: 44,
-              fontWeight: FontWeight.w800,
+              fontFamily: AppTheme.headingFont,
+              fontSize: 50,
+              fontWeight: FontWeight.w900,
               color: AppColors.forest,
               letterSpacing: 1,
             ),

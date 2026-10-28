@@ -5,13 +5,15 @@ import '../../l10n/strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/worker_directory.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/category_thumb.dart';
 import '../../widgets/language_toggle.dart';
+import '../../widgets/primary_button.dart';
 import 'category_screen.dart';
 import 'find_worker_screen.dart';
 
-/// First tab: every category with search. Tapping a category opens its
-/// subcategories, and a subcategory opens the workers listed under it.
+/// First tab: a service + city search, then every category. Search opens
+/// the matching workers; tapping a category opens its subcategories.
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
@@ -20,34 +22,34 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  final _search = TextEditingController();
+  final _service = TextEditingController();
+  final _city = TextEditingController();
 
   @override
   void dispose() {
-    _search.dispose();
+    _service.dispose();
+    _city.dispose();
     super.dispose();
+  }
+
+  void _searchWorkers() {
+    FocusScope.of(context).unfocus();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => FindWorkerScreen(
+        initialQuery: _service.text.trim(),
+        initialLocation: _city.text.trim(),
+      ),
+    ));
   }
 
   void _openGroup(CategoryGroup g) => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => CategoryScreen(group: g)),
       );
 
-  void _openSub(WorkCategory c) => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FindWorkerScreen(
-            group: CategoryGroup.byId(c.groupId),
-            initialCategory: c.en,
-          ),
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<LanguageProvider>().language;
     final counts = context.watch<WorkerDirectory>().countsByCategory;
-    final raw = _search.text.trim();
-    final q = raw.toLowerCase();
-    final searching = q.isNotEmpty;
 
     return RefreshIndicator(
       color: AppColors.leaf,
@@ -74,6 +76,7 @@ class _HomeTabState extends State<HomeTab> {
               const Text(
                 'Sahayi',
                 style: TextStyle(
+                  fontFamily: AppTheme.headingFont,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: AppColors.forest,
@@ -87,7 +90,8 @@ class _HomeTabState extends State<HomeTab> {
           Text(
             _greeting(context),
             style: const TextStyle(
-              fontSize: 24,
+              fontFamily: AppTheme.headingFont,
+              fontSize: AppTheme.headingSize,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),
@@ -95,115 +99,58 @@ class _HomeTabState extends State<HomeTab> {
           const SizedBox(height: 4),
           Text(
             S.of(context, 'find_worker_desc'),
-            style: const TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: AppTheme.subheadingSize, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 18),
           TextField(
-            controller: _search,
-            onChanged: (_) => setState(() {}),
-            textInputAction: TextInputAction.search,
-            onSubmitted: (_) {},
+            controller: _service,
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search_rounded),
+              prefixIcon: const Icon(Icons.handyman_outlined),
               hintText: S.of(context, 'search_categories'),
-              suffixIcon: searching
-                  ? IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () => setState(_search.clear),
-                    )
-                  : null,
             ),
           ),
-          const SizedBox(height: 20),
-          if (searching)
-            ..._results(context, lang, counts, q, raw)
-          else ...[
-            Text(
-              S.of(context, 'all_services'),
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _city,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => _searchWorkers(),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.location_on_outlined),
+              hintText: S.of(context, 'enter_city'),
             ),
-            const SizedBox(height: 12),
-            _CardList(
-              rows: [
-                for (final g in CategoryGroup.all)
-                  _CardRow(
-                    thumb: CategoryThumb(
-                      icon: g.icon,
-                      color: g.color,
-                      imageAsset: g.imageAsset,
-                    ),
-                    title: g.label(lang),
-                    subtitle: g.preview(lang, count: 6),
-                    footer: _countText(context, _groupCount(g, counts)),
-                    onTap: () => _openGroup(g),
+          ),
+          const SizedBox(height: 12),
+          PrimaryButton(
+            label: S.of(context, 'search'),
+            icon: Icons.search_rounded,
+            onPressed: _searchWorkers,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            S.of(context, 'all_services'),
+            style: const TextStyle(fontFamily: AppTheme.headingFont, fontWeight: FontWeight.w800, fontSize: AppTheme.headingSize),
+          ),
+          const SizedBox(height: 12),
+          _CardList(
+            rows: [
+              for (final g in CategoryGroup.all)
+                _CardRow(
+                  thumb: CategoryThumb(
+                    icon: g.icon,
+                    color: g.color,
+                    imageAsset: g.imageAsset,
                   ),
-              ],
-            ),
-          ],
+                  title: g.label(lang),
+                  subtitle: g.preview(lang, count: 6),
+                  footer: _countText(context, _groupCount(g, counts)),
+                  onTap: () => _openGroup(g),
+                ),
+            ],
+          ),
         ],
       ),
     );
-  }
-
-  List<Widget> _results(BuildContext context, AppLanguage lang,
-      Map<String, int> counts, String q, String raw) {
-    bool hit(String en, String ml) => en.toLowerCase().contains(q) || ml.contains(q);
-    final groups = CategoryGroup.all.where((g) => hit(g.en, g.ml)).toList();
-    final subs = WorkCategory.all.where((c) => hit(c.en, c.ml)).toList();
-
-    return [
-      if (groups.isEmpty && subs.isEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: Text(
-              S.of(context, 'no_services_match'),
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-        )
-      else
-        _CardList(
-          rows: [
-            for (final g in groups)
-              _CardRow(
-                thumb: CategoryThumb(icon: g.icon, color: g.color, imageAsset: g.imageAsset),
-                title: g.label(lang),
-                subtitle: g.preview(lang, count: 6),
-                footer: _countText(context, _groupCount(g, counts)),
-                onTap: () => _openGroup(g),
-              ),
-            for (final c in subs)
-              _CardRow(
-                thumb: CategoryThumb(
-                  icon: c.icon,
-                  color: CategoryGroup.byId(c.groupId)?.color ?? AppColors.leaf,
-                ),
-                title: c.label(lang),
-                subtitle: CategoryGroup.byId(c.groupId)?.label(lang) ?? '',
-                footer: _countText(context, counts[c.en] ?? 0),
-                onTap: () => _openSub(c),
-              ),
-          ],
-        ),
-      const SizedBox(height: 14),
-      _CardList(
-        rows: [
-          _CardRow(
-            thumb: const CategoryThumb(
-              icon: Icons.person_search_rounded,
-              color: AppColors.roofDeep,
-              size: 56,
-            ),
-            title: '${S.of(context, 'search_workers_for')} “$raw”',
-            subtitle: S.of(context, 'find_worker_title'),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => FindWorkerScreen(initialQuery: raw),
-            )),
-          ),
-        ],
-      ),
-    ];
   }
 }
 
@@ -284,6 +231,7 @@ class _CardRow extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
+                      fontFamily: AppTheme.headingFont,
                       fontWeight: FontWeight.w800,
                       fontSize: 17,
                       color: AppColors.textPrimary,
@@ -295,25 +243,35 @@ class _CardRow extends StatelessWidget {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13.5,
+                      color: AppColors.textPrimary,
+                      fontSize: AppTheme.subheadingSize,
+                      fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
                   ),
                   if (footer != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      footer!,
-                      style: const TextStyle(
-                        color: AppColors.leaf,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.forest.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        footer!,
+                        style: const TextStyle(
+                          color: AppColors.forest,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.forest),
           ],
         ),
       ),

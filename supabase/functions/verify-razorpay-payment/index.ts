@@ -1,6 +1,7 @@
 // Verifies Razorpay's signature server-side, then unlocks the account.
 import {
-  adminClient, AMOUNT_PAISE, corsHeaders, getUser, hmacSha256Hex, json, markPaid, safeEqual,
+  adminClient, corsHeaders, getUser, hmacSha256Hex, json, markPaid, PURPOSES, safeEqual,
+  toPurpose,
 } from "../_shared/common.ts";
 
 Deno.serve(async (req) => {
@@ -20,10 +21,10 @@ Deno.serve(async (req) => {
   // The order must be one we created for THIS user at the right amount.
   const { data: row } = await admin
     .from("payments")
-    .select("user_id, amount, status")
+    .select("user_id, amount, status, purpose")
     .eq("razorpay_order_id", razorpay_order_id)
     .maybeSingle();
-  if (!row || row.user_id !== user.id || row.amount !== AMOUNT_PAISE) {
+  if (!row || row.user_id !== user.id || row.amount !== PURPOSES[toPurpose(row.purpose)].amount) {
     return json({ error: "order_mismatch" }, 400);
   }
   if (row.status === "paid") return json({ paid: true });

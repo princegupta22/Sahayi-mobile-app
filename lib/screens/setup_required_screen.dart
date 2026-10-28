@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 /// Shown only when SUPABASE_URL / SUPABASE_ANON_KEY have not been set.
 class SetupRequiredScreen extends StatelessWidget {
@@ -18,7 +19,10 @@ class SetupRequiredScreen extends StatelessWidget {
               Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.roof),
               SizedBox(height: 18),
               Text('Connect Supabase',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  style: TextStyle(
+                      fontFamily: AppTheme.headingFont,
+                      fontSize: AppTheme.headingSize,
+                      fontWeight: FontWeight.w800)),
               SizedBox(height: 12),
               Text(
                 '1. Run supabase/schema.sql in the Supabase SQL editor.\n'

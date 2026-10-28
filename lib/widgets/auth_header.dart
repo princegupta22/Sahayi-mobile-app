@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import 'language_toggle.dart';
 
 /// Curved green hero used at the top of login / signup / payment.
@@ -68,8 +69,9 @@ class AuthHeader extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
+              fontFamily: AppTheme.headingFont,
               color: Colors.white,
-              fontSize: 28,
+              fontSize: AppTheme.headingSize,
               fontWeight: FontWeight.w800,
               height: 1.2,
             ),
@@ -79,7 +81,7 @@ class AuthHeader extends StatelessWidget {
             subtitle,
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 14,
+              fontSize: AppTheme.subheadingSize,
               height: 1.45,
             ),
           ),

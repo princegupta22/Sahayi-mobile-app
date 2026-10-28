@@ -24,14 +24,17 @@ class S {
       AppLanguage.english: 'Profile',
       AppLanguage.malayalam: 'പ്രൊഫൈൽ',
     },
-    'dashboard_title_work': {
-      AppLanguage.english: 'Work',
-      AppLanguage.malayalam: 'ജോലി',
-    },
-    'work_tab': {AppLanguage.english: 'Work', AppLanguage.malayalam: 'ജോലി'},
     'search_categories': {
       AppLanguage.english: 'Search services, e.g. Electrician',
       AppLanguage.malayalam: 'സേവനങ്ങൾ തിരയുക, ഉദാ. ഇലക്ട്രീഷ്യൻ',
+    },
+    'enter_city': {
+      AppLanguage.english: 'City, e.g. Kochi',
+      AppLanguage.malayalam: 'നഗരം, ഉദാ. കൊച്ചി',
+    },
+    'search': {
+      AppLanguage.english: 'Search',
+      AppLanguage.malayalam: 'തിരയുക',
     },
     'all_services': {
       AppLanguage.english: 'All Services',
@@ -53,35 +56,14 @@ class S {
       AppLanguage.english: 'No matching service found',
       AppLanguage.malayalam: 'യോജിക്കുന്ന സേവനം കണ്ടെത്തിയില്ല',
     },
-    'search_workers_for': {
-      AppLanguage.english: 'Search workers for',
-      AppLanguage.malayalam: 'തൊഴിലാളികളെ തിരയുക:',
-    },
     'choose_service': {
       AppLanguage.english: 'Choose a service',
       AppLanguage.malayalam: 'ഒരു സേവനം തിരഞ്ഞെടുക്കുക',
-    },
-    'select_service': {
-      AppLanguage.english: 'Select your service',
-      AppLanguage.malayalam: 'നിങ്ങളുടെ സേവനം തിരഞ്ഞെടുക്കുക',
     },
     'close': {AppLanguage.english: 'Close', AppLanguage.malayalam: 'അടയ്ക്കുക'},
     'greeting': {
       AppLanguage.english: 'Welcome back',
       AppLanguage.malayalam: 'തിരികെ സ്വാഗതം',
-    },
-    'dashboard_subtitle': {
-      AppLanguage.english: 'What would you like to do today?',
-      AppLanguage.malayalam: 'ഇന്ന് നിങ്ങൾ എന്ത് ചെയ്യാൻ ആഗ്രഹിക്കുന്നു?',
-    },
-    'find_work_title': {
-      AppLanguage.english: 'Find Work',
-      AppLanguage.malayalam: 'ജോലി കണ്ടെത്തുക',
-    },
-    'find_work_desc': {
-      AppLanguage.english: 'List your skills and get hired nearby',
-      AppLanguage.malayalam:
-          'നിങ്ങളുടെ വൈദഗ്ധ്യം ചേർത്ത് സമീപത്ത് ജോലി നേടുക',
     },
     'find_worker_title': {
       AppLanguage.english: 'Find Worker',
@@ -244,8 +226,8 @@ class S {
       AppLanguage.malayalam: 'നിങ്ങൾ ഇതുവരെ നിങ്ങളുടെ ജോലി ലിസ്റ്റ് ചെയ്തിട്ടില്ല',
     },
     'create_listing': {
-      AppLanguage.english: 'Create Listing',
-      AppLanguage.malayalam: 'ലിസ്റ്റിംഗ് സൃഷ്ടിക്കുക',
+      AppLanguage.english: 'Create Worker Profile',
+      AppLanguage.malayalam: 'തൊഴിലാളി പ്രൊഫൈൽ സൃഷ്ടിക്കുക',
     },
     'coming_soon': {
       AppLanguage.english: 'Coming soon',
@@ -303,6 +285,22 @@ class S {
       AppLanguage.english: 'Join Sahayi to find work or trusted help nearby.',
       AppLanguage.malayalam: 'ജോലി കണ്ടെത്താനോ വിശ്വസനീയമായ സഹായം കണ്ടെത്താനോ സഹായിയിൽ ചേരുക.',
     },
+    'consent_terms': {
+      AppLanguage.english:
+          "This app is provided on an 'as is' basis without warranties of any kind. We are not liable for any losses resulting from your use of the app or any transactions conducted outside the official platform.",
+      AppLanguage.malayalam:
+          "ഈ ആപ്പ് യാതൊരു വിധ വാറന്റിയും ഇല്ലാതെ 'ഉള്ളതുപോലെ' എന്ന അടിസ്ഥാനത്തിലാണ് നൽകുന്നത്. ആപ്പിന്റെ ഉപയോഗത്തിൽ നിന്നോ ഔദ്യോഗിക പ്ലാറ്റ്‌ഫോമിന് പുറത്ത് നടത്തുന്ന ഇടപാടുകളിൽ നിന്നോ ഉണ്ടാകുന്ന നഷ്ടങ്ങൾക്ക് ഞങ്ങൾ ഉത്തരവാദികളല്ല.",
+    },
+    'consent_no_bypass': {
+      AppLanguage.english:
+          'Users and service providers are strictly prohibited from exchanging direct contact information to bypass the app. All communications and bookings must occur through the official platform. Bypassing the app violates our policy and will lead to immediate account suspension.',
+      AppLanguage.malayalam:
+          'ആപ്പ് ഒഴിവാക്കുന്നതിനായി ഉപയോക്താക്കളും സേവന ദാതാക്കളും നേരിട്ടുള്ള ബന്ധപ്പെടൽ വിവരങ്ങൾ കൈമാറുന്നത് കർശനമായി നിരോധിച്ചിരിക്കുന്നു. എല്ലാ ആശയവിനിമയങ്ങളും ബുക്കിംഗുകളും ഔദ്യോഗിക പ്ലാറ്റ്‌ഫോമിലൂടെ മാത്രമേ നടക്കാവൂ. ആപ്പ് ഒഴിവാക്കുന്നത് ഞങ്ങളുടെ നയത്തിന്റെ ലംഘനമാണ്, ഇത് ഉടനടി അക്കൗണ്ട് സസ്പെൻഷനിലേക്ക് നയിക്കും.',
+    },
+    'err_consent': {
+      AppLanguage.english: 'Please tick to agree before continuing',
+      AppLanguage.malayalam: 'തുടരുന്നതിന് മുമ്പ് ടിക്ക് ചെയ്ത് സമ്മതിക്കുക',
+    },
     'name_hint': {
       AppLanguage.english: 'e.g. Anjali Nair',
       AppLanguage.malayalam: 'ഉദാ: അഞ്ജലി നായർ',
@@ -331,37 +329,89 @@ class S {
       AppLanguage.english: 'Reliable service, now at your home too.',
       AppLanguage.malayalam: 'വിശ്വസനീയ സേവനം, ഇനി നിങ്ങളുടെ വീട്ടിലും.',
     },
-    'one_last_step': {
-      AppLanguage.english: 'One Last Step',
-      AppLanguage.malayalam: 'അവസാന ഘട്ടം',
+    'unlock_contact': {
+      AppLanguage.english: 'Unlock Contact',
+      AppLanguage.malayalam: 'ബന്ധപ്പെടൽ അൺലോക്ക് ചെയ്യുക',
     },
-    'fee_subtitle': {
-      AppLanguage.english: 'A small one-time fee keeps Sahayi listings genuine and spam-free.',
-      AppLanguage.malayalam: 'സഹായി ലിസ്റ്റിംഗുകൾ യഥാർത്ഥവും സ്പാം രഹിതവുമായി നിലനിർത്താൻ ഒരു ചെറിയ ഒറ്റത്തവണ ഫീസ്.',
+    'unlock_subtitle': {
+      AppLanguage.english: 'Pay once to message and call any worker on Sahayi.',
+      AppLanguage.malayalam: 'സഹായിയിലെ ഏത് തൊഴിലാളിക്കും സന്ദേശം അയയ്ക്കാനും വിളിക്കാനും ഒരിക്കൽ മാത്രം പണമടയ്ക്കുക.',
     },
-    'registration_fee': {
-      AppLanguage.english: 'Registration Fee',
-      AppLanguage.malayalam: 'രജിസ്ട്രേഷൻ ഫീസ്',
+    'unlock_fee': {
+      AppLanguage.english: 'Contact Unlock Fee',
+      AppLanguage.malayalam: 'ബന്ധപ്പെടൽ അൺലോക്ക് ഫീസ്',
+    },
+    'listing_fee_title': {
+      AppLanguage.english: 'Publish Your Profile',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ പ്രൊഫൈൽ പ്രസിദ്ധീകരിക്കുക',
+    },
+    'listing_fee_subtitle': {
+      AppLanguage.english: 'A small one-time fee keeps worker profiles genuine and spam-free.',
+      AppLanguage.malayalam: 'തൊഴിലാളി പ്രൊഫൈലുകൾ യഥാർത്ഥവും സ്പാം രഹിതവുമായി നിലനിർത്താൻ ഒരു ചെറിയ ഒറ്റത്തവണ ഫീസ്.',
+    },
+    'listing_fee': {
+      AppLanguage.english: 'Worker Profile Fee',
+      AppLanguage.malayalam: 'തൊഴിലാളി പ്രൊഫൈൽ ഫീസ്',
+    },
+    'perk_listed': {
+      AppLanguage.english: 'Your profile shown to customers',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ പ്രൊഫൈൽ ഉപഭോക്താക്കൾക്ക് കാണാം',
+    },
+    'perk_get_contacted': {
+      AppLanguage.english: 'Customers can message and call you',
+      AppLanguage.malayalam: 'ഉപഭോക്താക്കൾക്ക് നിങ്ങൾക്ക് സന്ദേശം അയയ്ക്കാനും വിളിക്കാനും കഴിയും',
+    },
+    'perk_edit_anytime': {
+      AppLanguage.english: 'Edit your profile any time',
+      AppLanguage.malayalam: 'എപ്പോൾ വേണമെങ്കിലും പ്രൊഫൈൽ എഡിറ്റ് ചെയ്യാം',
+    },
+    'available': {
+      AppLanguage.english: 'Available',
+      AppLanguage.malayalam: 'ലഭ്യമാണ്',
+    },
+    'booked': {
+      AppLanguage.english: 'Booked',
+      AppLanguage.malayalam: 'ബുക്ക് ചെയ്തു',
+    },
+    'availability': {
+      AppLanguage.english: 'Availability',
+      AppLanguage.malayalam: 'ലഭ്യത',
+    },
+    'now_available': {
+      AppLanguage.english: 'Customers now see you as Available',
+      AppLanguage.malayalam: 'ഉപഭോക്താക്കൾ ഇപ്പോൾ നിങ്ങളെ "ലഭ്യമാണ്" എന്ന് കാണും',
+    },
+    'now_booked': {
+      AppLanguage.english: 'Customers now see you as Booked',
+      AppLanguage.malayalam: 'ഉപഭോക്താക്കൾ ഇപ്പോൾ നിങ്ങളെ "ബുക്ക് ചെയ്തു" എന്ന് കാണും',
+    },
+    'availability_hint': {
+      AppLanguage.english: 'Turn off when you are booked. Customers will see "Booked".',
+      AppLanguage.malayalam: 'ബുക്ക് ആയിരിക്കുമ്പോൾ ഓഫ് ചെയ്യുക. ഉപഭോക്താക്കൾ "ബുക്ക് ചെയ്തു" എന്ന് കാണും.',
+    },
+    'incl_taxes': {
+      AppLanguage.english: '(Inclusive of all Taxes)',
+      AppLanguage.malayalam: '(എല്ലാ നികുതികളും ഉൾപ്പെടെ)',
     },
     'one_time': {
       AppLanguage.english: 'One-time charge, no renewals',
       AppLanguage.malayalam: 'ഒറ്റത്തവണ ചാർജ്, പുതുക്കൽ ഇല്ല',
     },
-    'perk_badge': {
-      AppLanguage.english: 'Verified profile badge',
-      AppLanguage.malayalam: 'സ്ഥിരീകരിച്ച പ്രൊഫൈൽ ബാഡ്ജ്',
+    'perk_message': {
+      AppLanguage.english: 'Message any worker',
+      AppLanguage.malayalam: 'ഏത് തൊഴിലാളിക്കും സന്ദേശം അയയ്ക്കാം',
     },
-    'perk_access': {
-      AppLanguage.english: 'Access to Find Work & Find Worker',
-      AppLanguage.malayalam: 'ജോലി / തൊഴിലാളി തിരയലിലേക്കുള്ള ആക്‌സസ്',
+    'perk_call': {
+      AppLanguage.english: 'Call any worker',
+      AppLanguage.malayalam: 'ഏത് തൊഴിലാളിയെയും വിളിക്കാം',
     },
-    'perk_browse': {
-      AppLanguage.english: 'Unlimited browsing',
-      AppLanguage.malayalam: 'പരിധിയില്ലാത്ത ബ്രൗസിംഗ്',
+    'perk_all_workers': {
+      AppLanguage.english: 'Works for every worker on Sahayi',
+      AppLanguage.malayalam: 'സഹായിയിലെ എല്ലാ തൊഴിലാളികൾക്കും ബാധകം',
     },
     'pay_now': {
-      AppLanguage.english: 'Pay ₹19 Now',
-      AppLanguage.malayalam: 'ഇപ്പോൾ ₹19 അടയ്ക്കുക',
+      AppLanguage.english: 'Pay Now',
+      AppLanguage.malayalam: 'ഇപ്പോൾ അടയ്ക്കുക',
     },
     'payment_success': {
       AppLanguage.english: 'Payment Successful',
@@ -402,10 +452,6 @@ class S {
     'err_payment': {
       AppLanguage.english: 'Payment could not be completed. If money was deducted, it will unlock shortly.',
       AppLanguage.malayalam: 'പേയ്‌മെന്റ് പൂർത്തിയായില്ല. പണം പോയെങ്കിൽ ഉടൻ അൺലോക്ക് ആകും.',
-    },
-    'checking_account': {
-      AppLanguage.english: 'Checking your account…',
-      AppLanguage.malayalam: 'നിങ്ങളുടെ അക്കൗണ്ട് പരിശോധിക്കുന്നു…',
     },
     'err_generic': {
       AppLanguage.english: 'Something went wrong. Please try again.',

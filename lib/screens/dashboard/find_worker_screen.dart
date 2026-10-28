@@ -7,6 +7,8 @@ import '../../providers/worker_directory.dart';
 import '../../services/app_errors.dart';
 import '../../services/contact_actions.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/availability_tag.dart';
 import '../../widgets/photo_viewer.dart';
 import '../../widgets/worker_avatar.dart';
 import 'worker_detail_screen.dart';
@@ -17,11 +19,13 @@ class FindWorkerScreen extends StatefulWidget {
   final CategoryGroup? group;
   final String? initialCategory;
   final String? initialQuery;
+  final String? initialLocation;
   const FindWorkerScreen({
     super.key,
     this.group,
     this.initialCategory,
     this.initialQuery,
+    this.initialLocation,
   });
 
   @override
@@ -38,6 +42,18 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
     super.initState();
     _category = widget.initialCategory;
     _searchController.text = widget.initialQuery ?? '';
+    _locationController.text = widget.initialLocation ?? '';
+  }
+
+  /// Tapping the selected city again clears the location filter.
+  void _pickCity(String city, bool selected) =>
+      setState(() => _locationController.text = selected ? '' : city);
+
+  /// Lets a group name ("Plumbing", "Cleaning") find the workers in it.
+  static bool _groupMatches(String categoryEn, String query) {
+    final g = CategoryGroup.ofCategory(categoryEn);
+    return g != null &&
+        (g.en.toLowerCase().contains(query) || g.ml.contains(query));
   }
 
   @override
@@ -52,6 +68,7 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
     final lang = context.watch<LanguageProvider>().language;
     final directory = context.watch<WorkerDirectory>();
     final allWorkers = directory.workers;
+    final cities = directory.countsByCity.keys;
 
     final query = _searchController.text.trim().toLowerCase();
     final location = _locationController.text.trim().toLowerCase();
@@ -63,9 +80,11 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
       final matchesQuery = query.isEmpty ||
           w.categoryEn.toLowerCase().contains(query) ||
           w.categoryMl.contains(query) ||
-          w.name.toLowerCase().contains(query);
+          w.name.toLowerCase().contains(query) ||
+          _groupMatches(w.categoryEn, query);
+      final city = w.city.toLowerCase();
       final matchesLocation = location.isEmpty ||
-          w.city.toLowerCase().contains(location) ||
+          city.contains(location) ||
           w.country.toLowerCase().contains(location);
       return matchesCategory && matchesQuery && matchesLocation;
     }).toList();
@@ -106,19 +125,40 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
                     ],
                   ),
                 ),
+                if (cities.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      for (final c in cities)
+                        Builder(builder: (context) {
+                          final selected = location == c.toLowerCase();
+                          return _FilterChip(
+                            label: c,
+                            icon: Icons.location_city_rounded,
+                            selected: selected,
+                            onTap: () => _pickCity(c, selected),
+                          );
+                        }),
+                    ],
+                  ),
+                ),
+                ],
                 const SizedBox(height: 16),
                 if (widget.group != null) SizedBox(
                   height: 40,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      _CategoryFilterChip(
+                      _FilterChip(
                         label: S.read(context, 'all'),
                         selected: _category == null,
                         onTap: () => setState(() => _category = null),
                       ),
                       ...widget.group!.subs.map(
-                        (c) => _CategoryFilterChip(
+                        (c) => _FilterChip(
                           label: c.label(lang),
                           icon: c.icon,
                           selected: _category == c.en,
@@ -213,13 +253,13 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
   }
 }
 
-class _CategoryFilterChip extends StatelessWidget {
+class _FilterChip extends StatelessWidget {
   final String label;
   final IconData? icon;
   final bool selected;
   final VoidCallback onTap;
 
-  const _CategoryFilterChip({
+  const _FilterChip({
     required this.label,
     this.icon,
     required this.selected,
@@ -427,6 +467,8 @@ class _WorkerCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const Spacer(),
+                  AvailabilityTag(available: worker.isAvailable),
                 ],
               ),
             ),
@@ -596,7 +638,7 @@ class _EmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: AppTheme.subheadingSize),
               ),
             ],
             if (action != null) action!,

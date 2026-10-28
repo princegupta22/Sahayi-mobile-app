@@ -9,9 +9,14 @@ class Worker {
   final int experienceYears;
   final String about;
   final double rating;
+
+  /// Empty for other people's listings; see worker_phone() in payments.sql.
   final String phone;
   final String? photoUrl;
   final List<String> workPhotoUrls;
+
+  /// Set by the worker; others see an Available / Booked tag.
+  final bool isAvailable;
 
   const Worker({
     required this.id,
@@ -27,9 +32,27 @@ class Worker {
     this.phone = '',
     this.photoUrl,
     this.workPhotoUrls = const [],
+    this.isAvailable = true,
   });
 
   int get avatarColorSeed => id.hashCode.abs();
+
+  Worker copyWith({bool? isAvailable}) => Worker(
+    id: id,
+    userId: userId,
+    name: name,
+    categoryEn: categoryEn,
+    categoryMl: categoryMl,
+    city: city,
+    country: country,
+    experienceYears: experienceYears,
+    about: about,
+    rating: rating,
+    phone: phone,
+    photoUrl: photoUrl,
+    workPhotoUrls: workPhotoUrls,
+    isAvailable: isAvailable ?? this.isAvailable,
+  );
 
   factory Worker.fromMap(Map<String, dynamic> m) => Worker(
     id: m['id'] as String,
@@ -46,5 +69,6 @@ class Worker {
     photoUrl: m['photo_url'] as String?,
     workPhotoUrls: ((m['work_photo_urls'] as List?) ?? const [])
         .cast<String>(),
+    isAvailable: (m['is_available'] as bool?) ?? true,
   );
 }

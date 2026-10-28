@@ -69,9 +69,16 @@ flutter:
   assets:
     - .env
     - assets/logo.png
-    - assets/work.png
-    - assets/worker.png
     - assets/categories/
+
+  # Tinos: free, metric-compatible Times New Roman (SIL OFL, see
+  # assets/fonts/OFL.txt). Android doesn't ship Times New Roman.
+  fonts:
+    - family: Tinos
+      fonts:
+        - asset: assets/fonts/Tinos-Regular.ttf
+        - asset: assets/fonts/Tinos-Bold.ttf
+          weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -8,7 +8,7 @@ import '../../widgets/auth_header.dart';
 import '../../widgets/field_label.dart';
 import '../../widgets/email_field.dart';
 import '../../widgets/primary_button.dart';
-import '../payment/payment_screen.dart';
+import '../dashboard/dashboard_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -47,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const PaymentScreen()),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
         (route) => false,
       );
     } catch (e) {
@@ -136,6 +136,16 @@ class _SignupScreenState extends State<SignupScreen> {
                           ? S.read(context, 'err_match')
                           : null,
                     ),
+                    const SizedBox(height: 24),
+                    _ConsentField(
+                      text: S.of(context, 'consent_terms'),
+                      error: S.of(context, 'err_consent'),
+                    ),
+                    const SizedBox(height: 14),
+                    _ConsentField(
+                      text: S.of(context, 'consent_no_bypass'),
+                      error: S.of(context, 'err_consent'),
+                    ),
                     const SizedBox(height: 28),
                     PrimaryButton(
                       label: S.of(context, 'create_account'),
@@ -171,4 +181,67 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
+}
+
+/// Required tick box: the signup form won't validate until it is ticked.
+class _ConsentField extends FormField<bool> {
+  _ConsentField({required String text, required String error})
+      : super(
+          initialValue: false,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (v) => v == true ? null : error,
+          builder: (field) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => field.didChange(field.value != true),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: field.value,
+                        onChanged: field.didChange,
+                        activeColor: AppColors.leaf,
+                        side: BorderSide(
+                          color: field.hasError
+                              ? AppColors.danger
+                              : AppColors.textSecondary,
+                          width: 1.6,
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (field.hasError)
+                Padding(
+                  padding: const EdgeInsets.only(left: 34, top: 4),
+                  child: Text(
+                    field.errorText!,
+                    style: const TextStyle(
+                      color: AppColors.danger,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
 }

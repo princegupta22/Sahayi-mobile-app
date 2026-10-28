@@ -8,7 +8,7 @@ import '../../widgets/auth_header.dart';
 import '../../widgets/field_label.dart';
 import '../../widgets/email_field.dart';
 import '../../widgets/primary_button.dart';
-import '../payment/payment_gate.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PaymentGate()),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } catch (e) {
       if (!mounted) return;

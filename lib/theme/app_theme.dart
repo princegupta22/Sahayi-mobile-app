@@ -4,6 +4,30 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  /// Times New Roman look-alike used for all body text.
+  static const String bodyFont = 'Tinos';
+
+  /// Main screen headings keep the original sans-serif font.
+  static const String headingFont = 'Roboto';
+
+  /// Screen and section headings.
+  static const double headingSize = 18;
+
+  /// The line under a heading (descriptions, card subtitles).
+  static const double subheadingSize = 14;
+
+  /// Keeps the layout intact when the phone's font size setting is very
+  /// small or very large, while still respecting it.
+  static Widget clampTextScale(BuildContext context, Widget? child) {
+    final mq = MediaQuery.of(context);
+    return MediaQuery(
+      data: mq.copyWith(
+        textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.2),
+      ),
+      child: child!,
+    );
+  }
+
   static ThemeData get light {
     final base = ThemeData(
       useMaterial3: true,
@@ -14,16 +38,22 @@ class AppTheme {
         surface: AppColors.surface,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: 'Roboto',
+      fontFamily: bodyFont,
     );
 
     return base.copyWith(
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
+        titleTextStyle: base.textTheme.titleLarge!.copyWith(
+          fontFamily: headingFont,
+          fontSize: headingSize,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimary,
+        ),
       ),
       textTheme: base.textTheme.apply(
         bodyColor: AppColors.textPrimary,
@@ -64,6 +94,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
+            fontFamily: bodyFont,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

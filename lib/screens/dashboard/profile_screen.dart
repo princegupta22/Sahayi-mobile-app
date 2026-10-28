@@ -4,7 +4,10 @@ import '../../l10n/strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/conversations_provider.dart';
 import '../../providers/worker_directory.dart';
+import '../../services/app_errors.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/availability_tag.dart';
 import '../../widgets/language_toggle.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/worker_avatar.dart';
@@ -28,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Text(
             S.of(context, 'my_profile'),
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontFamily: AppTheme.headingFont, fontSize: AppTheme.headingSize, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 22),
           Container(
@@ -72,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          Text(S.of(context, 'my_listing'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          Text(S.of(context, 'my_listing'), style: const TextStyle(fontFamily: AppTheme.headingFont, fontWeight: FontWeight.w800, fontSize: AppTheme.headingSize)),
           const SizedBox(height: 12),
           if (myListing == null)
             Container(
@@ -139,8 +142,12 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
+          if (myListing != null) ...[
+            const SizedBox(height: 12),
+            _AvailabilitySwitch(available: myListing.isAvailable),
+          ],
           const SizedBox(height: 28),
-          Text(S.of(context, 'settings'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          Text(S.of(context, 'settings'), style: const TextStyle(fontFamily: AppTheme.headingFont, fontWeight: FontWeight.w800, fontSize: AppTheme.headingSize)),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -183,6 +190,87 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lets the worker mark themselves Available or Booked for everyone else.
+class _AvailabilitySwitch extends StatefulWidget {
+  final bool available;
+  const _AvailabilitySwitch({required this.available});
+
+  @override
+  State<_AvailabilitySwitch> createState() => _AvailabilitySwitchState();
+}
+
+class _AvailabilitySwitchState extends State<_AvailabilitySwitch> {
+  late bool _value = widget.available;
+  bool _saving = false;
+
+  @override
+  void didUpdateWidget(_AvailabilitySwitch old) {
+    super.didUpdateWidget(old);
+    if (!_saving) _value = widget.available;
+  }
+
+  /// Flips the switch right away and rolls it back if the save fails.
+  Future<void> _set(bool available) async {
+    setState(() {
+      _value = available;
+      _saving = true;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    String key;
+    try {
+      await context.read<WorkerDirectory>().setAvailable(available);
+      key = available ? 'now_available' : 'now_booked';
+    } catch (e) {
+      debugPrint('setAvailable failed: $e');
+      key = errorKeyFor(e);
+      if (mounted) setState(() => _value = !available);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+    if (!mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(S.read(context, key))));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(S.of(context, 'availability'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                    const SizedBox(width: 8),
+                    AvailabilityTag(available: _value),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(S.of(context, 'availability_hint'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              ],
+            ),
+          ),
+          Switch(
+            value: _value,
+            activeTrackColor: AppColors.leaf,
+            onChanged: _saving ? null : _set,
           ),
         ],
       ),

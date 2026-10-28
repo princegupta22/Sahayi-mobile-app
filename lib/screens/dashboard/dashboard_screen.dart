@@ -5,7 +5,6 @@ import '../../providers/conversations_provider.dart';
 import '../../providers/worker_directory.dart';
 import '../../theme/app_colors.dart';
 import 'home_tab.dart';
-import 'work_tab.dart';
 import 'messages_tab.dart';
 import 'profile_screen.dart';
 
@@ -31,12 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [
-      const HomeTab(),
-      WorkTab(onFindWorker: () => setState(() => _index = 0)),
-      const MessagesTab(),
-      const ProfileScreen(),
-    ];
+    const tabs = [HomeTab(), MessagesTab(), ProfileScreen()];
 
     return Scaffold(
       body: SafeArea(child: IndexedStack(index: _index, children: tabs)),
@@ -52,11 +46,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               icon: const Icon(Icons.home_outlined),
               selectedIcon: const Icon(Icons.home_rounded),
               label: S.of(context, 'home'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.work_outline_rounded),
-              selectedIcon: const Icon(Icons.work_rounded),
-              label: S.of(context, 'work_tab'),
             ),
             NavigationDestination(
               icon: Badge(
