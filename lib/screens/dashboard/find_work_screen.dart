@@ -32,6 +32,7 @@ class _FindWorkScreenState extends State<FindWorkScreen> {
   final _cityController = TextEditingController();
   final _countryController = TextEditingController(text: 'India');
   final _phoneController = TextEditingController();
+  final _customServiceController = TextEditingController();
 
   XFile? _newProfilePhoto;
   String? _existingProfileUrl;
@@ -55,6 +56,7 @@ class _FindWorkScreenState extends State<FindWorkScreen> {
       _existingProfileUrl = mine.photoUrl;
       _workPhotos.addAll(mine.workPhotoUrls.map(ListingPhoto.remote));
       _category = WorkCategory.byEnglish(mine.categoryEn);
+      _customServiceController.text = mine.customService;
     } else {
       _nameController.text = context.read<AuthProvider>().name;
     }
@@ -68,6 +70,7 @@ class _FindWorkScreenState extends State<FindWorkScreen> {
     _cityController.dispose();
     _countryController.dispose();
     _phoneController.dispose();
+    _customServiceController.dispose();
     super.dispose();
   }
 
@@ -142,6 +145,8 @@ class _FindWorkScreenState extends State<FindWorkScreen> {
         experienceYears: int.parse(_experienceController.text.trim()),
         about: _aboutController.text.trim(),
         phone: _phoneController.text.trim(),
+        customService:
+            _category!.isOther ? _customServiceController.text.trim() : '',
         newProfilePhoto: _newProfilePhoto,
         workPhotos: _workPhotos,
       );
@@ -274,6 +279,23 @@ class _FindWorkScreenState extends State<FindWorkScreen> {
                 lang: lang,
                 onTap: _pickCategory,
               ),
+              if (_category?.isOther ?? false) ...[
+                const SizedBox(height: 14),
+                _Label(S.of(context, 'your_service')),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _customServiceController,
+                  maxLength: 60,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.edit_outlined),
+                    hintText: S.of(context, 'your_service_hint'),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? S.read(context, 'required_field')
+                      : null,
+                ),
+              ],
               const SizedBox(height: 20),
               _Label(S.of(context, 'experience_years')),
               const SizedBox(height: 8),

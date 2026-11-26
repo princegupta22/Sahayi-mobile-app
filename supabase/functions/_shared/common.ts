@@ -1,10 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/** One-time payments: price (fixed on the server – never trust the client)
- *  and the profiles flag each one unlocks. */
+/** One-time purchases (Google Play Billing, Android only).
+ *  Each one is a "one-time product" in Play Console and unlocks a flag on
+ *  profiles. Keep productId in sync with lib/services/payment_service.dart. */
 export const PURPOSES = {
-  contact: { amount: 9900, flag: "is_paid", paidAt: "paid_at" },             // ₹99
-  listing: { amount: 9900, flag: "is_worker_paid", paidAt: "worker_paid_at" }, // ₹99
+  contact: {
+    productId: "contact_unlock",
+    amount: 14900, // ₹149 – ledger only; the real price is set in Play Console
+    flag: "is_paid",
+    paidAt: "paid_at",
+  },
+  listing: {
+    productId: "worker_listing",
+    amount: 14900,
+    flag: "is_worker_paid",
+    paidAt: "worker_paid_at",
+  },
 } as const;
 export type Purpose = keyof typeof PURPOSES;
 
@@ -43,53 +54,16 @@ export async function getUser(req: Request) {
   return error ? null : data.user;
 }
 
-export async function hmacSha256Hex(secret: string, message: string) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(message),
-  );
-  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-export function safeEqual(a: string, b: string) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-/** Marks a payment row paid and flips the profile flag for its purpose.
- *  Idempotent. */
-export async function markPaid(
+/** Turns on the profile flag a purchase unlocks. Idempotent. */
+export async function grant(
   admin: ReturnType<typeof adminClient>,
-  orderId: string,
-  paymentId: string,
+  userId: string,
+  purpose: Purpose,
 ) {
-  const { data: row, error } = await admin
-    .from("payments")
-    .update({
-      status: "paid",
-      razorpay_payment_id: paymentId,
-      paid_at: new Date().toISOString(),
-    })
-    .eq("razorpay_order_id", orderId)
-    .select("user_id, purpose")
-    .single();
-  if (error || !row) throw new Error("payment row not found");
-
-  const { flag, paidAt } = PURPOSES[toPurpose(row.purpose)];
-  const { error: pErr } = await admin
+  const { flag, paidAt } = PURPOSES[purpose];
+  const { error } = await admin
     .from("profiles")
     .update({ [flag]: true, [paidAt]: new Date().toISOString() })
-    .eq("id", row.user_id);
-  if (pErr) throw pErr;
+    .eq("id", userId);
+  if (error) throw error;
 }

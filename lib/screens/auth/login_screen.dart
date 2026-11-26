@@ -9,6 +9,7 @@ import '../../widgets/field_label.dart';
 import '../../widgets/email_field.dart';
 import '../../widgets/primary_button.dart';
 import '../dashboard/dashboard_screen.dart';
+import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -100,7 +101,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? S.read(context, 'err_password')
                           : null,
                     ),
-                    const SizedBox(height: 28),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ForgotPasswordScreen(
+                              initialEmail: _emailController.text.trim(),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          S.of(context, 'forgot_password'),
+                          style: const TextStyle(
+                            color: AppColors.leaf,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     PrimaryButton(
                       label: S.of(context, 'log_in'),
                       loading: _loading,

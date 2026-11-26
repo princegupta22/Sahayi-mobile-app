@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/supabase_config.dart';
+import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/worker.dart';
 import '../providers/auth_provider.dart';
@@ -16,7 +17,7 @@ void _toast(BuildContext context, String key) {
     ..showSnackBar(SnackBar(content: Text(S.read(context, key))));
 }
 
-/// Messaging or calling a worker needs the one-time ₹99 unlock
+/// Messaging or calling a worker needs the one-time ₹149 unlock
 /// (profiles.is_paid). Opens checkout if it isn't paid yet; true once it is.
 Future<bool> _unlockContact(BuildContext context, Worker worker) async {
   final auth = context.read<AuthProvider>();
@@ -57,7 +58,9 @@ Future<void> messageWorker(BuildContext context, Worker worker) async {
         otherUserId: worker.userId,
         otherName: worker.name,
         otherAvatarUrl: worker.photoUrl,
-        subtitle: worker.categoryEn,
+        subtitle: worker.serviceLabel(
+          context.read<LanguageProvider>().language,
+        ),
       ),
     ),
   );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../../config/supabase_config.dart';
 import '../../l10n/app_language.dart';
 import '../../l10n/strings.dart';
@@ -99,11 +100,17 @@ class _ChatScreenState extends State<ChatScreen> {
         'conversation_id': _conversationId,
         'body': text,
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       _input.text = text;
+      // RLS rejects the insert when the other person turned messages off.
+      final blocked = e is PostgrestException && e.code == '42501';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.read(context, 'send_failed'))),
+        SnackBar(
+          content: Text(
+            S.read(context, blocked ? 'messages_disabled' : 'send_failed'),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _sending = false);

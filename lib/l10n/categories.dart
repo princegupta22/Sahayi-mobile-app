@@ -17,6 +17,12 @@ class WorkCategory {
         for (final g in CategoryGroup.all) ...g.subs,
       ];
 
+  /// Stored in `workers.category_en` when the worker types their own service
+  /// (the text itself goes in `workers.custom_service`).
+  static const otherEn = 'Other';
+
+  bool get isOther => en == otherEn;
+
   static WorkCategory? byEnglish(String en) =>
       all.where((c) => c.en == en).firstOrNull;
 }
@@ -226,6 +232,11 @@ class CategoryGroup {
       ('Upholstery Worker', 'സോഫ / അപ്ഹോൾസ്റ്ററി ജോലിക്കാരൻ', Icons.weekend_rounded),
       ('Mattress Maker', 'മെത്ത നിർമ്മാതാവ്', Icons.bed_rounded),
       ('Cane & Bamboo Worker', 'ചൂരൽ / മുള പണിക്കാരൻ', Icons.grass_rounded),
+    ]),
+    // Catch-all so nobody is blocked from listing a service we didn't think of.
+    _g('other', 'Other Services', 'മറ്റ് സേവനങ്ങൾ', Icons.more_horiz_rounded,
+        const Color(0xFF6D4C41), [
+      (WorkCategory.otherEn, 'മറ്റുള്ളവ', Icons.add_circle_outline_rounded),
     ]),
   ];
 }

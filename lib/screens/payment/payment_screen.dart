@@ -52,13 +52,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       final outcome = await PaymentService.pay(
         purpose: widget.purpose,
-        name: auth.name,
-        email: auth.email,
+        userId: auth.userId!,
       );
       if (!mounted || outcome == PaymentOutcome.cancelled) return;
+      if (outcome == PaymentOutcome.pending) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.read(context, 'payment_pending'))),
+        );
+        return;
+      }
       // Trust the server, not the checkout callback.
-      if (!await auth.refreshPaid(widget.purpose))
+      if (!await auth.refreshPaid(widget.purpose)) {
         throw StateError('payment_failed');
+      }
       if (!mounted) return;
       await _showSuccess();
       if (!mounted) return;
@@ -205,10 +211,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: PrimaryButton(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!PaymentService.supported) ...[
+                    Text(
+                      S.of(context, 'err_android_only'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  PrimaryButton(
                 label: S.of(context, 'pay_now'),
                 loading: _loading,
-                onPressed: _pay,
+                // Purchases only exist on Android (Google Play).
+                onPressed: PaymentService.supported ? _pay : null,
+                  ),
+                ],
               ),
             ),
           ),

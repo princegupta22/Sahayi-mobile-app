@@ -1,14 +1,15 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Network: Supabase API, realtime chat and image loading -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!-- Gallery access for profile / work photos.
-         Android 13+ uses the system photo picker (READ_MEDIA_IMAGES covers
-         devices that fall back to the legacy picker); Android 12 and below
-         need READ_EXTERNAL_STORAGE. -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
+    <!-- Photos are chosen with the system photo picker (image_picker), which
+         needs no storage/media permission. Keep these removed: Google Play
+         restricts READ_MEDIA_IMAGES / READ_EXTERNAL_STORAGE. The tools:node
+         lines also strip them if a plugin ever adds them back. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
 

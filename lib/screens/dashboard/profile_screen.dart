@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_language.dart';
 import '../../l10n/strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/conversations_provider.dart';
@@ -127,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Text(myListing.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
                           const SizedBox(height: 3),
-                          Text(myListing.categoryEn, style: const TextStyle(color: AppColors.leaf, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                          Text(myListing.serviceLabel(context.watch<LanguageProvider>().language), style: const TextStyle(color: AppColors.leaf, fontSize: 12.5, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -145,6 +146,11 @@ class ProfileScreen extends StatelessWidget {
           if (myListing != null) ...[
             const SizedBox(height: 12),
             _AvailabilitySwitch(available: myListing.isAvailable),
+            const SizedBox(height: 12),
+            _ContactOptions(
+              phonePublic: myListing.phonePublic,
+              allowMessages: myListing.allowMessages,
+            ),
           ],
           const SizedBox(height: 28),
           Text(S.of(context, 'settings'), style: const TextStyle(fontFamily: AppTheme.headingFont, fontWeight: FontWeight.w800, fontSize: AppTheme.headingSize)),
@@ -187,6 +193,16 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  const Divider(height: 1),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.delete_forever_outlined, color: AppColors.danger),
+                    title: Text(
+                      S.of(context, 'delete_account'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: AppColors.danger),
+                    ),
+                    onTap: () => _deleteAccount(context),
+                  ),
                 ],
               ),
             ),
@@ -195,6 +211,74 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Asks for confirmation, deletes the account on the server and returns to
+/// the login screen. On failure the user stays signed in and sees why.
+Future<void> _deleteAccount(BuildContext context) async {
+  final nav = Navigator.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final auth = context.read<AuthProvider>();
+  final directory = context.read<WorkerDirectory>();
+  final convos = context.read<ConversationsProvider>();
+  // Looked up now: the screen may already be gone once the account is deleted.
+  final deletedMsg = S.read(context, 'account_deleted');
+  final failedMsg = S.read(context, 'err_delete_account');
+  final networkMsg = S.read(context, 'err_network');
+
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(S.of(ctx, 'delete_account_title')),
+      content: Text(S.of(ctx, 'delete_account_body')),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(S.of(ctx, 'cancel')),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+          child: Text(S.of(ctx, 'delete_account_confirm')),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  // Block the screen while the server works; a half-finished delete is worse
+  // than a spinner.
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const PopScope(
+      canPop: false,
+      child: Center(child: CircularProgressIndicator()),
+    ),
+  );
+
+  try {
+    await auth.deleteAccount();
+  } catch (e) {
+    debugPrint('deleteAccount failed: $e');
+    nav.pop(); // spinner
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(errorKeyFor(e) == 'err_network' ? networkMsg : failedMsg),
+      ));
+    return;
+  }
+
+  await convos.stop();
+  directory.clear();
+  nav.pushAndRemoveUntil(
+    MaterialPageRoute(builder: (_) => const LoginScreen()),
+    (route) => false,
+  );
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(deletedMsg)));
 }
 
 /// Lets the worker mark themselves Available or Booked for everyone else.
@@ -274,6 +358,157 @@ class _AvailabilitySwitchState extends State<_AvailabilitySwitch> {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+/// "Who can see the number" (Only me / Public) and "Get messages"
+/// (Disable / Enable). Customers only see the Call / Message buttons the
+/// worker has turned on.
+class _ContactOptions extends StatefulWidget {
+  final bool phonePublic;
+  final bool allowMessages;
+  const _ContactOptions({required this.phonePublic, required this.allowMessages});
+
+  @override
+  State<_ContactOptions> createState() => _ContactOptionsState();
+}
+
+class _ContactOptionsState extends State<_ContactOptions> {
+  late bool _phonePublic = widget.phonePublic;
+  late bool _allowMessages = widget.allowMessages;
+  bool _saving = false;
+
+  @override
+  void didUpdateWidget(_ContactOptions old) {
+    super.didUpdateWidget(old);
+    if (!_saving) {
+      _phonePublic = widget.phonePublic;
+      _allowMessages = widget.allowMessages;
+    }
+  }
+
+  /// Applies the change right away and rolls it back if the save fails.
+  Future<void> _save({bool? phonePublic, bool? allowMessages}) async {
+    final prevPhone = _phonePublic;
+    final prevMsgs = _allowMessages;
+    setState(() {
+      _phonePublic = phonePublic ?? _phonePublic;
+      _allowMessages = allowMessages ?? _allowMessages;
+      _saving = true;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    String key;
+    try {
+      await context
+          .read<WorkerDirectory>()
+          .setContactPrefs(phonePublic: phonePublic, allowMessages: allowMessages);
+      key = phonePublic != null
+          ? (phonePublic ? 'phone_now_public' : 'phone_now_private')
+          : (allowMessages! ? 'messages_now_on' : 'messages_now_off');
+    } catch (e) {
+      debugPrint('setContactPrefs failed: $e');
+      key = errorKeyFor(e);
+      if (mounted) {
+        setState(() {
+          _phonePublic = prevPhone;
+          _allowMessages = prevMsgs;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+    if (!mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(S.read(context, key))));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(S.of(context, 'contact_options'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+          const SizedBox(height: 2),
+          Text(S.of(context, 'contact_options_hint'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          const SizedBox(height: 14),
+          _OptionRow(
+            icon: Icons.call_outlined,
+            label: S.of(context, 'who_can_see_number'),
+            offLabel: S.of(context, 'only_me'),
+            onLabel: S.of(context, 'public_label'),
+            value: _phonePublic,
+            enabled: !_saving,
+            onChanged: (v) => _save(phonePublic: v),
+          ),
+          const SizedBox(height: 12),
+          _OptionRow(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: S.of(context, 'get_messages'),
+            offLabel: S.of(context, 'disable_label'),
+            onLabel: S.of(context, 'enable_label'),
+            value: _allowMessages,
+            enabled: !_saving,
+            onChanged: (v) => _save(allowMessages: v),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A label with a two-way choice (off / on) on the right.
+class _OptionRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String offLabel;
+  final String onLabel;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+  const _OptionRow({
+    required this.icon,
+    required this.label,
+    required this.offLabel,
+    required this.onLabel,
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 19, color: AppColors.leaf),
+        const SizedBox(width: 10),
+        Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
+        const SizedBox(width: 8),
+        SegmentedButton<bool>(
+          showSelectedIcon: false,
+          style: SegmentedButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            textStyle: const TextStyle(fontFamily: AppTheme.bodyFont, fontSize: 12, fontWeight: FontWeight.w700),
+            selectedBackgroundColor: AppColors.leaf,
+            selectedForegroundColor: Colors.white,
+          ),
+          segments: [
+            ButtonSegment(value: false, label: Text(offLabel)),
+            ButtonSegment(value: true, label: Text(onLabel)),
+          ],
+          selected: {value},
+          onSelectionChanged: enabled ? (s) => onChanged(s.first) : null,
+        ),
+      ],
     );
   }
 }

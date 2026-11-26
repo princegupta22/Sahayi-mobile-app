@@ -5,10 +5,10 @@ import '../../l10n/strings.dart';
 import '../../models/worker.dart';
 import '../../providers/worker_directory.dart';
 import '../../services/app_errors.dart';
-import '../../services/contact_actions.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/availability_tag.dart';
+import '../../widgets/contact_buttons.dart';
 import '../../widgets/photo_viewer.dart';
 import '../../widgets/worker_avatar.dart';
 import 'worker_detail_screen.dart';
@@ -80,6 +80,7 @@ class _FindWorkerScreenState extends State<FindWorkerScreen> {
       final matchesQuery = query.isEmpty ||
           w.categoryEn.toLowerCase().contains(query) ||
           w.categoryMl.contains(query) ||
+          w.customService.toLowerCase().contains(query) ||
           w.name.toLowerCase().contains(query) ||
           _groupMatches(w.categoryEn, query);
       final city = w.city.toLowerCase();
@@ -342,8 +343,7 @@ class _WorkerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final category =
-        lang == AppLanguage.malayalam ? worker.categoryMl : worker.categoryEn;
+    final category = worker.serviceLabel(lang);
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => WorkerDetailScreen(worker: worker)),
@@ -426,16 +426,14 @@ class _WorkerCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                          worker.rating > 0
-                              ? Icons.star_rounded
-                              : Icons.auto_awesome_rounded,
+                          Icons.star_rounded,
                           size: 15,
                           color: AppColors.roof),
                       const SizedBox(width: 3),
                       Text(
-                        worker.rating > 0
-                            ? worker.rating.toStringAsFixed(1)
-                            : S.of(context, 'new_label'),
+                        worker.hasRating
+                            ? '${worker.rating.toStringAsFixed(1)} (${worker.ratingCount})'
+                            : '0.0',
                         style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w800,
@@ -476,48 +474,10 @@ class _WorkerCard extends StatelessWidget {
               const SizedBox(height: 12),
               WorkPhotoStrip(worker: worker, tileSize: 64),
             ],
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Material(
-                  color: AppColors.background,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () => callWorker(context, worker),
-                    child: const SizedBox(
-                      width: 46,
-                      height: 46,
-                      child: Icon(Icons.call_rounded,
-                          size: 20, color: AppColors.forest),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: SizedBox(
-                    height: 46,
-                    child: ElevatedButton.icon(
-                      onPressed: () => messageWorker(context, worker),
-                      icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
-                      label: Text(
-                        S.of(context, 'send_message'),
-                        style: const TextStyle(
-                            fontSize: 13.5, fontWeight: FontWeight.w700),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.forest,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(23),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            if (ContactButtons.isVisible(worker)) ...[
+              const SizedBox(height: 14),
+              ContactButtons(worker: worker, height: 46, fontSize: 13.5),
+            ],
           ],
         ),
       ),

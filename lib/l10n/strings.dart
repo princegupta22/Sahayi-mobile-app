@@ -449,6 +449,10 @@ class S {
       AppLanguage.english: 'Too many attempts. Please wait a minute.',
       AppLanguage.malayalam: 'ഒരുപാട് ശ്രമങ്ങൾ. ഒരു മിനിറ്റ് കാത്തിരിക്കുക.',
     },
+    'err_email_send': {
+      AppLanguage.english: 'Could not send the email. Please try again in a few minutes.',
+      AppLanguage.malayalam: 'ഇമെയിൽ അയയ്ക്കാനായില്ല. കുറച്ച് മിനിറ്റിനു ശേഷം വീണ്ടും ശ്രമിക്കുക.',
+    },
     'err_payment': {
       AppLanguage.english: 'Payment could not be completed. If money was deducted, it will unlock shortly.',
       AppLanguage.malayalam: 'പേയ്‌മെന്റ് പൂർത്തിയായില്ല. പണം പോയെങ്കിൽ ഉടൻ അൺലോക്ക് ആകും.',
@@ -521,9 +525,281 @@ class S {
       AppLanguage.english: 'Please log in again.',
       AppLanguage.malayalam: 'ദയവായി വീണ്ടും പ്രവേശിക്കുക.',
     },
+    'your_service': {
+      AppLanguage.english: 'Your service',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ സേവനം',
+    },
+    'your_service_hint': {
+      AppLanguage.english: 'e.g. Wall painting artist',
+      AppLanguage.malayalam: 'ഉദാ: വാൾ പെയിന്റിംഗ് ആർട്ടിസ്റ്റ്',
+    },
+    'contact_options': {
+      AppLanguage.english: 'Contact options',
+      AppLanguage.malayalam: 'ബന്ധപ്പെടാനുള്ള ഓപ്ഷനുകൾ',
+    },
+    'contact_options_hint': {
+      AppLanguage.english: 'Customers only see the Call and Message buttons you turn on.',
+      AppLanguage.malayalam: 'നിങ്ങൾ ഓൺ ചെയ്ത കോൾ, സന്ദേശ ബട്ടണുകൾ മാത്രമേ ഉപഭോക്താക്കൾ കാണൂ.',
+    },
+    'who_can_see_number': {
+      AppLanguage.english: 'Who can see my number',
+      AppLanguage.malayalam: 'എന്റെ നമ്പർ ആർക്കൊക്കെ കാണാം',
+    },
+    'only_me': {
+      AppLanguage.english: 'Only me',
+      AppLanguage.malayalam: 'ഞാൻ മാത്രം',
+    },
+    'public_label': {
+      AppLanguage.english: 'Public',
+      AppLanguage.malayalam: 'എല്ലാവർക്കും',
+    },
+    'get_messages': {
+      AppLanguage.english: 'Get messages',
+      AppLanguage.malayalam: 'സന്ദേശങ്ങൾ സ്വീകരിക്കുക',
+    },
+    'enable_label': {
+      AppLanguage.english: 'Enable',
+      AppLanguage.malayalam: 'ഓൺ',
+    },
+    'disable_label': {
+      AppLanguage.english: 'Disable',
+      AppLanguage.malayalam: 'ഓഫ്',
+    },
+    'phone_now_public': {
+      AppLanguage.english: 'Customers can now call you',
+      AppLanguage.malayalam: 'ഉപഭോക്താക്കൾക്ക് ഇപ്പോൾ നിങ്ങളെ വിളിക്കാം',
+    },
+    'phone_now_private': {
+      AppLanguage.english: 'Your number is now hidden. Only you can see it.',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ നമ്പർ മറച്ചു. നിങ്ങൾക്ക് മാത്രമേ കാണാനാകൂ.',
+    },
+    'messages_now_on': {
+      AppLanguage.english: 'Customers can now message you',
+      AppLanguage.malayalam: 'ഉപഭോക്താക്കൾക്ക് ഇപ്പോൾ നിങ്ങൾക്ക് സന്ദേശം അയയ്ക്കാം',
+    },
+    'messages_now_off': {
+      AppLanguage.english: 'Messages are turned off for your profile',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ പ്രൊഫൈലിൽ സന്ദേശങ്ങൾ ഓഫ് ചെയ്തു',
+    },
+    'not_taking_contact': {
+      AppLanguage.english: 'This worker is not taking calls or messages right now.',
+      AppLanguage.malayalam: 'ഈ തൊഴിലാളി ഇപ്പോൾ കോളുകളോ സന്ദേശങ്ങളോ സ്വീകരിക്കുന്നില്ല.',
+    },
+    'call_worker': {
+      AppLanguage.english: 'Call',
+      AppLanguage.malayalam: 'വിളിക്കുക',
+    },
+    'messages_disabled': {
+      AppLanguage.english: 'This worker has turned off messages.',
+      AppLanguage.malayalam: 'ഈ തൊഴിലാളി സന്ദേശങ്ങൾ ഓഫ് ചെയ്തിരിക്കുന്നു.',
+    },
+    'err_android_only': {
+      AppLanguage.english: 'Purchases are available on Android only.',
+      AppLanguage.malayalam: 'പർച്ചേസുകൾ ആൻഡ്രോയിഡിൽ മാത്രമേ ലഭ്യമുള്ളൂ.',
+    },
+    'err_billing_unavailable': {
+      AppLanguage.english: 'Google Play is not available. Update Google Play and try again.',
+      AppLanguage.malayalam: 'ഗൂഗിൾ പ്ലേ ലഭ്യമല്ല. ഗൂഗിൾ പ്ലേ അപ്ഡേറ്റ് ചെയ്ത് വീണ്ടും ശ്രമിക്കുക.',
+    },
+    'err_product_not_found': {
+      AppLanguage.english: 'This purchase is not available right now. Please try later.',
+      AppLanguage.malayalam: 'ഈ പർച്ചേസ് ഇപ്പോൾ ലഭ്യമല്ല. പിന്നീട് ശ്രമിക്കുക.',
+    },
+    'err_purchase_used': {
+      AppLanguage.english: 'This purchase was already used for another account.',
+      AppLanguage.malayalam: 'ഈ പർച്ചേസ് മറ്റൊരു അക്കൗണ്ടിനായി ഇതിനകം ഉപയോഗിച്ചു.',
+    },
+    'payment_pending': {
+      AppLanguage.english: 'Your payment is pending. You will be unlocked once Google Play confirms it.',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ പേയ്‌മെന്റ് തീർപ്പാക്കാനുണ്ട്. ഗൂഗിൾ പ്ലേ സ്ഥിരീകരിച്ചാൽ അൺലോക്ക് ആകും.',
+    },
+    'forgot_password': {
+      AppLanguage.english: 'Forgot password?',
+      AppLanguage.malayalam: 'പാസ്‌വേഡ് മറന്നോ?',
+    },
+    'forgot_title': {
+      AppLanguage.english: 'Forgot password',
+      AppLanguage.malayalam: 'പാസ്‌വേഡ് മറന്നു',
+    },
+    'forgot_subtitle': {
+      AppLanguage.english: 'Enter your registered email. We will send you a verification code.',
+      AppLanguage.malayalam: 'രജിസ്റ്റർ ചെയ്ത ഇമെയിൽ നൽകുക. ഞങ്ങൾ ഒരു വെരിഫിക്കേഷൻ കോഡ് അയയ്ക്കും.',
+    },
+    'send_code': {
+      AppLanguage.english: 'Send Code',
+      AppLanguage.malayalam: 'കോഡ് അയയ്ക്കുക',
+    },
+    'verify_title': {
+      AppLanguage.english: 'Verify code',
+      AppLanguage.malayalam: 'കോഡ് സ്ഥിരീകരിക്കുക',
+    },
+    'otp_subtitle': {
+      AppLanguage.english: 'Enter the code we sent to',
+      AppLanguage.malayalam: 'ഞങ്ങൾ അയച്ച കോഡ് നൽകുക:',
+    },
+    'otp_label': {
+      AppLanguage.english: 'Verification code',
+      AppLanguage.malayalam: 'വെരിഫിക്കേഷൻ കോഡ്',
+    },
+    'verify_btn': {
+      AppLanguage.english: 'Verify',
+      AppLanguage.malayalam: 'സ്ഥിരീകരിക്കുക',
+    },
+    'resend_code': {
+      AppLanguage.english: 'Resend code',
+      AppLanguage.malayalam: 'കോഡ് വീണ്ടും അയയ്ക്കുക',
+    },
+    'resend_in': {
+      AppLanguage.english: 'Resend code in',
+      AppLanguage.malayalam: 'കോഡ് വീണ്ടും അയയ്ക്കാൻ',
+    },
+    'code_sent': {
+      AppLanguage.english: 'A code was sent to your email',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ ഇമെയിലിലേക്ക് കോഡ് അയച്ചു',
+    },
+    'otp_spam_hint': {
+      AppLanguage.english: 'Did not get it? Check your spam folder.',
+      AppLanguage.malayalam: 'കിട്ടിയില്ലേ? സ്പാം ഫോൾഡർ പരിശോധിക്കുക.',
+    },
+    'err_otp': {
+      AppLanguage.english: 'Enter the code from your email',
+      AppLanguage.malayalam: 'ഇമെയിലിൽ ലഭിച്ച കോഡ് നൽകുക',
+    },
+    'err_otp_invalid': {
+      AppLanguage.english: 'Invalid or expired code. Try again.',
+      AppLanguage.malayalam: 'കോഡ് തെറ്റാണ് അല്ലെങ്കിൽ കാലാവധി കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക.',
+    },
+    'err_same_password': {
+      AppLanguage.english: 'New password must be different from the old one.',
+      AppLanguage.malayalam: 'പുതിയ പാസ്‌വേഡ് പഴയതിൽ നിന്ന് വ്യത്യസ്തമായിരിക്കണം.',
+    },
+    'reset_title': {
+      AppLanguage.english: 'Set new password',
+      AppLanguage.malayalam: 'പുതിയ പാസ്‌വേഡ് സജ്ജമാക്കുക',
+    },
+    'reset_subtitle': {
+      AppLanguage.english: 'Choose a password you have not used before.',
+      AppLanguage.malayalam: 'മുമ്പ് ഉപയോഗിക്കാത്ത ഒരു പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക.',
+    },
+    'new_password': {
+      AppLanguage.english: 'New Password',
+      AppLanguage.malayalam: 'പുതിയ പാസ്‌വേഡ്',
+    },
+    'update_password': {
+      AppLanguage.english: 'Update Password',
+      AppLanguage.malayalam: 'പാസ്‌വേഡ് പുതുക്കുക',
+    },
+    'password_updated': {
+      AppLanguage.english: 'Password updated',
+      AppLanguage.malayalam: 'പാസ്‌വേഡ് പുതുക്കി',
+    },
+    'password_updated_hint': {
+      AppLanguage.english: 'Please log in with your new password.',
+      AppLanguage.malayalam: 'പുതിയ പാസ്‌വേഡ് ഉപയോഗിച്ച് പ്രവേശിക്കുക.',
+    },
     'no_messages_yet': {
       AppLanguage.english: 'No messages yet',
       AppLanguage.malayalam: 'ഇതുവരെ സന്ദേശങ്ങൾ ഇല്ല',
+    },
+    'ratings_reviews': {
+      AppLanguage.english: 'Ratings & Reviews',
+      AppLanguage.malayalam: 'റേറ്റിംഗും റിവ്യൂകളും',
+    },
+    'reviews_label': {
+      AppLanguage.english: 'reviews',
+      AppLanguage.malayalam: 'റിവ്യൂ',
+    },
+    'no_reviews_yet': {
+      AppLanguage.english: 'No reviews yet. Be the first to rate this worker.',
+      AppLanguage.malayalam: 'ഇതുവരെ റിവ്യൂകൾ ഇല്ല. ആദ്യം റേറ്റ് ചെയ്യൂ.',
+    },
+    'rate_worker': {
+      AppLanguage.english: 'Rate this worker',
+      AppLanguage.malayalam: 'ഈ തൊഴിലാളിയെ റേറ്റ് ചെയ്യുക',
+    },
+    'edit_review': {
+      AppLanguage.english: 'Edit your review',
+      AppLanguage.malayalam: 'റിവ്യൂ തിരുത്തുക',
+    },
+    'your_rating': {
+      AppLanguage.english: 'Your rating',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ റേറ്റിംഗ്',
+    },
+    'write_review_hint': {
+      AppLanguage.english: 'Share your experience (optional)',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ അനുഭവം പങ്കുവയ്ക്കൂ (ഓപ്ഷണൽ)',
+    },
+    'submit_review': {
+      AppLanguage.english: 'Submit',
+      AppLanguage.malayalam: 'സമർപ്പിക്കുക',
+    },
+    'review_saved': {
+      AppLanguage.english: 'Thanks! Your review was saved',
+      AppLanguage.malayalam: 'നന്ദി! റിവ്യൂ സേവ് ചെയ്തു',
+    },
+    'review_deleted': {
+      AppLanguage.english: 'Your review was deleted',
+      AppLanguage.malayalam: 'റിവ്യൂ ഇല്ലാതാക്കി',
+    },
+    'delete_review': {
+      AppLanguage.english: 'Delete review',
+      AppLanguage.malayalam: 'റിവ്യൂ ഇല്ലാതാക്കുക',
+    },
+    'pick_stars': {
+      AppLanguage.english: 'Please tap a star to rate',
+      AppLanguage.malayalam: 'റേറ്റ് ചെയ്യാൻ ഒരു നക്ഷത്രം തൊടുക',
+    },
+    'show_all_reviews': {
+      AppLanguage.english: 'Show all reviews',
+      AppLanguage.malayalam: 'എല്ലാ റിവ്യൂകളും കാണുക',
+    },
+    'show_fewer_reviews': {
+      AppLanguage.english: 'Show fewer',
+      AppLanguage.malayalam: 'കുറച്ച് കാണിക്കുക',
+    },
+    'you_label': {
+      AppLanguage.english: 'You',
+      AppLanguage.malayalam: 'നിങ്ങൾ',
+    },
+    'reviews_load_failed': {
+      AppLanguage.english: 'Could not load reviews',
+      AppLanguage.malayalam: 'റിവ്യൂകൾ ലോഡ് ചെയ്യാനായില്ല',
+    },
+    'cancel': {
+      AppLanguage.english: 'Cancel',
+      AppLanguage.malayalam: 'റദ്ദാക്കുക',
+    },
+    'delete_account': {
+      AppLanguage.english: 'Delete Account',
+      AppLanguage.malayalam: 'അക്കൗണ്ട് ഇല്ലാതാക്കുക',
+    },
+    'delete_account_title': {
+      AppLanguage.english: 'Delete your account?',
+      AppLanguage.malayalam: 'അക്കൗണ്ട് ഇല്ലാതാക്കണോ?',
+    },
+    'delete_account_body': {
+      AppLanguage.english: 'This permanently deletes your account, worker listing, photos, reviews and chats. Purchases are not restored. This cannot be undone.',
+      AppLanguage.malayalam: 'ഇത് നിങ്ങളുടെ അക്കൗണ്ട്, തൊഴിലാളി ലിസ്റ്റിംഗ്, ഫോട്ടോകൾ, റിവ്യൂകൾ, ചാറ്റുകൾ എന്നിവ എന്നെന്നേക്കുമായി ഇല്ലാതാക്കും. വാങ്ങലുകൾ തിരികെ ലഭിക്കില്ല. ഇത് പഴയപടിയാക്കാനാവില്ല.',
+    },
+    'delete_account_confirm': {
+      AppLanguage.english: 'Yes, delete',
+      AppLanguage.malayalam: 'അതെ, ഇല്ലാതാക്കുക',
+    },
+    'account_deleted': {
+      AppLanguage.english: 'Your account was deleted',
+      AppLanguage.malayalam: 'നിങ്ങളുടെ അക്കൗണ്ട് ഇല്ലാതാക്കി',
+    },
+    'err_delete_account': {
+      AppLanguage.english: 'Could not delete your account. Please try again.',
+      AppLanguage.malayalam: 'അക്കൗണ്ട് ഇല്ലാതാക്കാനായില്ല. വീണ്ടും ശ്രമിക്കുക.',
+    },
+    'own_listing_no_rate': {
+      AppLanguage.english: 'You cannot rate your own profile',
+      AppLanguage.malayalam: 'സ്വന്തം പ്രൊഫൈലിന് റേറ്റ് ചെയ്യാനാവില്ല',
+    },
+    'rating_hint_half': {
+      AppLanguage.english: 'Tap or slide on the stars. Half stars work too.',
+      AppLanguage.malayalam: 'നക്ഷത്രങ്ങളിൽ തൊടുകയോ നീക്കുകയോ ചെയ്യുക. പകുതി നക്ഷത്രവും നൽകാം.',
     },
   };
 

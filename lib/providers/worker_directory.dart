@@ -16,8 +16,8 @@ class ListingPhoto {
 class WorkerDirectory extends ChangeNotifier {
   /// Every column except phone, which only worker_phone() hands out.
   static const _columns = 'id, user_id, name, category_en, category_ml, city, '
-      'country, experience_years, about, rating, photo_url, work_photo_urls, '
-      'is_available';
+      'country, experience_years, about, rating, rating_count, photo_url, work_photo_urls, '
+      'is_available, custom_service, phone_public, allow_messages';
 
   List<Worker> _workers = [];
   Worker? _myListing;
@@ -99,6 +99,7 @@ class WorkerDirectory extends ChangeNotifier {
     required int experienceYears,
     required String about,
     required String phone,
+    String customService = '',
     XFile? newProfilePhoto,
     required List<ListingPhoto> workPhotos,
   }) async {
@@ -123,6 +124,7 @@ class WorkerDirectory extends ChangeNotifier {
       'experience_years': experienceYears,
       'about': about,
       'phone': phone,
+      'custom_service': customService,
       'photo_url': photoUrl,
       'work_photo_urls': workUrls,
     };
@@ -154,6 +156,28 @@ class WorkerDirectory extends ChangeNotifier {
     // RLS skips rows it won't let you change without raising an error.
     if (rows.isEmpty) throw StateError('availability_not_saved');
     _myListing = mine.copyWith(isAvailable: available);
+    _workers = [for (final w in _workers) w.id == mine.id ? _myListing! : w];
+    notifyListeners();
+  }
+
+  /// Who may see the number ("Only me" / "Public") and whether the worker
+  /// accepts new messages. Either can be left null to keep its current value.
+  Future<void> setContactPrefs({bool? phonePublic, bool? allowMessages}) async {
+    final mine = _myListing;
+    if (mine == null) return;
+    final rows = await supabase
+        .from('workers')
+        .update({
+          'phone_public': ?phonePublic,
+          'allow_messages': ?allowMessages,
+        })
+        .eq('id', mine.id)
+        .select('phone_public, allow_messages');
+    if (rows.isEmpty) throw StateError('contact_prefs_not_saved');
+    _myListing = mine.copyWith(
+      phonePublic: rows.first['phone_public'] as bool,
+      allowMessages: rows.first['allow_messages'] as bool,
+    );
     _workers = [for (final w in _workers) w.id == mine.id ? _myListing! : w];
     notifyListeners();
   }

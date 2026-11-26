@@ -1,4 +1,4 @@
-package com.example.sahayi
+package com.sahayiapp.`in`
 
 import io.flutter.embedding.android.FlutterActivity
 

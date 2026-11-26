@@ -1,7 +1,7 @@
 -- =====================================================================
 --  Sahayi – one-time payments (Razorpay), each with its own flag:
---    • contact (₹99) → profiles.is_paid        : call / message workers
---    • listing (₹99) → profiles.is_worker_paid : publish a worker profile
+--    • contact (₹149) → profiles.is_paid        : call / message workers
+--    • listing (₹149) → profiles.is_worker_paid : publish a worker profile
 --  Browsing workers is free. Amounts live in functions/_shared/common.ts.
 --  Run AFTER schema.sql: Supabase Dashboard → SQL Editor → New query.
 --  Safe to re-run.
@@ -31,7 +31,7 @@ create table if not exists public.payments (
   user_id               uuid not null references public.profiles (id) on delete cascade,
   razorpay_order_id     text not null unique,
   razorpay_payment_id   text unique,
-  amount                int  not null check (amount > 0),         -- in paise (9900 = ₹99)
+  amount                int  not null check (amount > 0),         -- in paise (14900 = ₹149)
   purpose               text not null default 'contact'
                           check (purpose in ('contact', 'listing')),
   currency              text not null default 'INR',

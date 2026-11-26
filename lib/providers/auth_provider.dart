@@ -43,6 +43,28 @@ class AuthProvider extends ChangeNotifier {
     if (res.session == null) throw StateError('email_confirmation_on');
   }
 
+  /// Emails a 6-digit code to a registered address (Supabase "Reset password"
+  /// template). Unknown emails get no mail but no error either.
+  Future<void> sendResetCode(String email) =>
+      supabase.auth.resetPasswordForEmail(_clean(email));
+
+  /// Checks the emailed code. On success Supabase signs the user in with a
+  /// short-lived recovery session, which [updatePassword] then uses.
+  Future<void> verifyResetCode({
+    required String email,
+    required String code,
+  }) async {
+    await supabase.auth.verifyOTP(
+      email: _clean(email),
+      token: code.trim(),
+      type: OtpType.recovery,
+    );
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    await supabase.auth.updateUser(UserAttributes(password: newPassword));
+  }
+
   final _paid = <PaymentPurpose, bool>{};
   bool hasPaid(PaymentPurpose purpose) => _paid[purpose] ?? false;
 
@@ -65,6 +87,23 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
     return hasPaid(purpose);
+  }
+
+  /// Permanently deletes the account through the `delete-account` edge
+  /// function (photos, listing, reviews, chats and the login all go), then
+  /// drops the now-invalid local session. Throws if the server refuses.
+  Future<void> deleteAccount() async {
+    final res = await supabase.functions.invoke('delete-account');
+    final data = res.data;
+    if (data is! Map || data['deleted'] != true) {
+      throw StateError('delete_failed');
+    }
+    _paid.clear();
+    try {
+      await supabase.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // The user no longer exists server-side; the local session is junk.
+    }
   }
 
   Future<void> signOut() async {
